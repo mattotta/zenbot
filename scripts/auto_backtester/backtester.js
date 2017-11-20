@@ -17,6 +17,7 @@ let json2csv  = require('json2csv');
 let roundp    = require('round-precision');
 let fs        = require('fs');
 let StripAnsi = require('strip-ansi');
+let moment    = require('moment')
 
 let VERSION = 'Zenbot 4.04 Backtester v0.2';
 
@@ -74,7 +75,7 @@ let runCommand = (strategy, cb) => {
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : 'cd ../../ && ./zenbot.sh'; // Use 'win32' for 64 bit windows too
   let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period} --min_periods=${strategy.min_periods} --silent`;
-  console.log(`[ ${countArr.length}/${strategies[strategyName].length} ] ${command}`);
+  console.log(moment().format('YYYY-MM-DD HH:mm:ss') + ` [ ${countArr.length}/${strategies[strategyName].length} ] ${command}`);
 
   shell.exec(command, {silent:true, async:true}, (code, stdout, stderr) => {
     if (code) {
@@ -259,7 +260,7 @@ let strategies = {
   trend_ema: objectProduct({
     period: ['5s', '10s', '1m', '5m', '30m', '1h'],
     min_periods: [52],
-    trend_ema: [1, , 2, 3, 4, 6, 8, 12, 16, 20, 26],
+    trend_ema: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     neutral_rate: [0, 'auto', 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 0.01, 0.013, 0.016, 0.02, 0.025, 0.03, 0.35, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.6, 0.8, 1.0],
     oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     oversold_rsi: [5, 10, 15, 20, 30]
@@ -267,7 +268,7 @@ let strategies = {
   reverse_trend_ema: objectProduct({
     period: ['5s', '10s', '1m'],
     min_periods: [52],
-    trend_ema: [1, , 2, 3, 4, 6, 8, 12, 16, 20, 26],
+    trend_ema: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     neutral_rate: [0, 'auto', 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 0.01, 0.013, 0.016, 0.02, 0.025, 0.03, 0.35, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.6, 0.8, 1.0],
     oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     oversold_rsi: [5, 10, 15, 20, 30]
