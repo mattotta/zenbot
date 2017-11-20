@@ -74,7 +74,7 @@ let runCommand = (strategy, cb) => {
     reverse_trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : 'cd ../../ && ./zenbot.sh'; // Use 'win32' for 64 bit windows too
-  let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period} --min_periods=${strategy.min_periods} --silent`;
+  let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period} --min_periods=${strategy.min_periods} --silent --filename=none`;
   console.log(moment().format('YYYY-MM-DD HH:mm:ss') + ` [ ${countArr.length}/${strategies[strategyName].length} ] ${command}`);
 
   shell.exec(command, {silent:true, async:true}, (code, stdout, stderr) => {
@@ -266,7 +266,7 @@ let strategies = {
     oversold_rsi: [5, 10, 15, 20, 30]
   }),
   reverse_trend_ema: objectProduct({
-    period: ['5s', '10s'],
+    period: ['1s', '2s', '3s', '5s', '10s'],
     min_periods: [52],
     trend_ema: [1, 2, 3, 4, 6],
     neutral_rate: [0, 'auto'],
