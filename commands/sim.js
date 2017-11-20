@@ -39,6 +39,7 @@ module.exports = function container (get, set, clear) {
       .option('--disable_options', 'disable printing of options')
       .option('--enable_stats', 'enable printing order stats')
       .option('--verbose', 'print status lines on every period')
+      .option('--silent', 'don not print status lines at all')
       .action(function (selector, cmd) {
         var s = {options: minimist(process.argv)}
         var so = s.options
@@ -67,6 +68,7 @@ module.exports = function container (get, set, clear) {
         so.stats = !!cmd.enable_stats
         so.show_options = !cmd.disable_options
         so.verbose = !!cmd.verbose
+        so.silent = !!cmd.silent
         so.selector = get('lib.normalize-selector')(selector || c.selector)
         so.mode = 'sim'
         if (cmd.conf) {
