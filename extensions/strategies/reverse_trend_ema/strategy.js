@@ -3,7 +3,7 @@ var z = require('zero-fill')
 
 module.exports = function container (get, set, clear) {
   return {
-    name: 'trend_ema_reverse',
+    name: 'reverse_trend_ema',
     description: 'Sell when (EMA - last(EMA) > 0) and buy when (EMA - last(EMA) < 0). Optional buy on low RSI.',
 
     getOptions: function () {
@@ -30,7 +30,7 @@ module.exports = function container (get, set, clear) {
         s.period.trend_ema_rate = (s.period.trend_ema - s.lookback[0].trend_ema) / s.lookback[0].trend_ema * 100
       }
       if (s.options.neutral_rate === 'auto') {
-        get('lib.stddev')(s, 'trend_ema_stddev', 10, 'trend_ema_rate')
+        get('lib.stddev')(s, 'trend_ema_stddev', s.options.trend_ema, 'trend_ema_rate')
       }
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
