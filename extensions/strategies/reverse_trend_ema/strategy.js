@@ -30,7 +30,11 @@ module.exports = function container (get, set, clear) {
         s.period.trend_ema_rate = (s.period.trend_ema - s.lookback[0].trend_ema) / s.lookback[0].trend_ema * 100
       }
       if (s.options.neutral_rate === 'auto') {
-        get('lib.stddev')(s, 'trend_ema_stddev', s.options.trend_ema, 'trend_ema_rate')
+        if (false && s.lookback[0] && s.lookback[0].trend_ema) {
+          s.period.trend_ema_stddev = (s.lookback[0].trend_ema / 1000) / s.options.trend_ema
+        } else {
+          s.period.trend_ema_stddev = (s.period.trend_ema / 1000) / s.options.trend_ema
+        }
       }
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
