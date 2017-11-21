@@ -268,7 +268,7 @@ let strategies = {
   reverse_trend_ema: objectProduct({
     period: ['1s', '2s', '3s', '5s', '10s'],
     min_periods: [52],
-    trend_ema: [1, 2, 3, 4, 6],
+    trend_ema: [1, 2, 3, 4, 5],
     neutral_rate: [0, 'auto'],
     oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     oversold_rsi: [5, 10, 15, 20, 30]
