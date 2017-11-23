@@ -179,7 +179,7 @@ module.exports = function container (get, set, clear) {
             query: {
               selector: so.selector
             },
-            sort: {time: 1},
+            sort: {time: 1, trade_id: 1},
             limit: 1000
           }
           if (so.end) {

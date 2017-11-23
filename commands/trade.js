@@ -220,7 +220,7 @@ module.exports = function container (get, set, clear) {
         var sessions = get('db.sessions')
         var balances = get('db.balances')
         var trades = get('db.trades')
-        get('db.mongo').collection('trades').ensureIndex({selector: 1, time: 1})
+        get('db.mongo').collection('trades').ensureIndex({selector: 1, time: 1, trade_id: 1})
         var resume_markers = get('db.resume_markers')
         get('db.mongo').collection('resume_markers').ensureIndex({selector: 1, to: -1})
         var marker = {
@@ -249,7 +249,7 @@ module.exports = function container (get, set, clear) {
               query: {
                 selector: so.selector
               },
-              sort: {time: 1},
+              sort: {time: 1, trade_id: 1},
               limit: 1000
             }
             if (db_cursor) {
@@ -451,6 +451,8 @@ module.exports = function container (get, set, clear) {
               trades.sort(function (a, b) {
                 if (a.time > b.time) return -1
                 if (a.time < b.time) return 1
+                if (a.trade_id > b.trade_id) return -1
+                if (a.trade_id < b.trade_id) return 1
                 return 0
               })
               trades.forEach(function (trade) {
