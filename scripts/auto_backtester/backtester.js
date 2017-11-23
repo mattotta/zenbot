@@ -73,7 +73,7 @@ let runCommand = (strategy, cb) => {
     trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate}`,
     reverse_trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate}`
   };
-  let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : 'cd ../../ && ./zenbot.sh'; // Use 'win32' for 64 bit windows too
+  let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh'; // Use 'win32' for 64 bit windows too
   let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period} --min_periods=${strategy.min_periods} --silent --filename=none`;
   console.log(moment().format('YYYY-MM-DD HH:mm:ss') + ` [ ${countArr.length}/${strategies[strategyName].length} ] ${command}`);
 
@@ -258,20 +258,20 @@ let strategies = {
     trigger_factor: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
   }),
   trend_ema: objectProduct({
-    period: ['5s', '10s', '1m', '5m', '30m', '1h'],
+    period: ['3s', '5s', '10s', '1m', '5m', '30m', '1h'],
     min_periods: [52],
     trend_ema: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
-    neutral_rate: [0, 'auto', 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 0.01, 0.013, 0.016, 0.02, 0.025, 0.03, 0.35, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.6, 0.8, 1.0],
+    neutral_rate: ['auto', 0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 0.01, 0.013, 0.016, 0.02, 0.025, 0.03, 0.35, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.6, 0.8, 1.0],
     oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
     oversold_rsi: [5, 10, 15, 20, 30]
   }),
   reverse_trend_ema: objectProduct({
-    period: ['1s', '2s', '3s', '5s', '10s'],
+    period: ['1s', '2s', '3s', '5s'],
     min_periods: [52],
-    trend_ema: [1, 2, 3, 4, 5],
-    neutral_rate: [0, 'auto'],
-    oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
-    oversold_rsi: [5, 10, 15, 20, 30]
+    trend_ema: [1, 2, 3],
+    neutral_rate: ['auto_new'],
+    oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 34, 40],
+    oversold_rsi: [5, 10, 15, 20, 30, 50]
   })
 };
 
