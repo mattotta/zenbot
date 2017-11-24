@@ -69,6 +69,7 @@ module.exports = function container (get, set, clear) {
         // move cursor into the past
         args.after = opts.to
       }
+      var self = this;
       client.getProductTrades(args, function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getTrades', func_args, err)
@@ -81,7 +82,38 @@ module.exports = function container (get, set, clear) {
             side: trade.side
           }
         })
-        trades.reverse()
+
+        if (trades.length) {
+          trades.sort(function (a, b) {
+            if (a.time > b.time) return -1
+            if (a.time < b.time) return 1
+            if (a.trade_id > b.trade_id) return -1
+            if (a.trade_id < b.trade_id) return 1
+            return 0
+          })
+          if ((!opts.time || (opts.time && opts.time == trades[0].time)) && trades[0].time == trades[trades.length - 1].time) {
+            if (!opts.time) {
+              opts.time = trades[0].time
+            }
+            if (opts.from) {
+              // move cursor into the future
+              opts.from = self.getCursor(trades[0])
+            }
+            else if (opts.to) {
+              // move cursor into the past
+              opts.to = self.getCursor(trades[trades.length - 1])
+            }
+            // get possible additional trades for same timestamp
+            self.getTrades(opts, function (err, next) {
+              if (next.length) {
+                trades = next.concat(trades)
+              }              
+              cb(null, trades)
+            })
+            return
+          }
+        }
+
         cb(null, trades)
       })
     },
