@@ -358,10 +358,16 @@ module.exports = function container (get, set, clear) {
           engine.writeHeader()
           getNext()
         })
-
+        var is_working = false
         var prev_timeout = null
         function forwardScan () {
+          if (is_working) {
+            return
+          } else {
+            is_working = true
+          }
           function saveSession () {
+            is_working = false
             engine.syncBalance(function (err) {
               if (err) {
                 console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error syncing balance')
@@ -444,6 +450,7 @@ module.exports = function container (get, set, clear) {
                 console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - getTrades request failed. retrying...')
                 console.error(err)
               }
+              is_working = false
               return
             }
             prev_timeout = null
