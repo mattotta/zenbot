@@ -102,7 +102,8 @@ module.exports = function container (get, set, clear) {
     getTrades: function (opts, cb) {
       var func_args = [].slice.call(arguments)
       var self = this;
-      this.getProductTrades(opts, function (trades) {
+      this.getProductTrades(opts, function (err, trades) {
+        if (err) return retry('getTrades', func_args, err)
         if (trades.length) {
           trades.sort(function (a, b) {
             if (a.time > b.time) return -1
@@ -150,9 +151,9 @@ module.exports = function container (get, set, clear) {
               trades.push(trade)
             }
           })
-          cb(trades)
+          cb(null, trades)
         } else {
-          cb(websocket_trades)
+          cb(null, websocket_trades)
         }
       } else {
         var client = publicClient(opts.product_id)
@@ -167,7 +168,7 @@ module.exports = function container (get, set, clear) {
         }
         client.getProductTrades(args, function (err, resp, body) {
           if (!err) err = statusErr(resp, body)
-          if (err) return retry('getTrades', func_args, err)
+          if (err) return cb(err, null)
           var trades = body.map(function (trade) {
             return {
               trade_id: trade.trade_id,
@@ -177,7 +178,7 @@ module.exports = function container (get, set, clear) {
               side: trade.side
             }
           })
-          cb(trades)
+          cb(null, trades)
         })
       }
     },
