@@ -154,6 +154,10 @@ c.balance_snapshot_period = '15m'
 c.avg_slippage_pct = 0.045
 // time to leave an order open, default to 1 day (this feature is not supported on all exchanges, currently: GDAX)
 c.cancel_after = 'day'
+// % to mark down bid price for simulated quote
+c.markdown_bid_pct = 0
+// % to mark up ask price for simulated quote
+c.markup_ask_pct = 0
 
 // Notifiers:
 c.notifiers = {}

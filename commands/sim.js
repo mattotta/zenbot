@@ -40,6 +40,8 @@ module.exports = function container (get, set, clear) {
       .option('--enable_stats', 'enable printing order stats')
       .option('--verbose', 'print status lines on every period')
       .option('--silent', 'don not print status lines at all')
+      .option('--markdown_bid_pct <pct>', '% to mark down bid price for simulated quote', Number, c.markdown_bid_pct)
+      .option('--markup_ask_pct <pct>', ' % to mark up ask price for simulated quote', Number, c.markup_ask_pct)
       .action(function (selector, cmd) {
         var s = {options: minimist(process.argv)}
         var so = s.options

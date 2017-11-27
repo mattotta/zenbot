@@ -72,6 +72,8 @@ module.exports = function container (get, set, clear) {
       .option('--leafIndicatorMutationProbability <value>', 'leaf indicator mutation probability (default: ' + fa_getTrainOptions().leafIndicatorMutationProbability + ')', Number)
       .option('--crossoverProbability <value>', 'crossover probability (default: ' + fa_getTrainOptions().crossoverProbability + ')', Number)
       .option('--indicators <value>', 'comma separated list of TA-lib indicators (default: ' + fa_defaultIndicators.toString() + ', available: ' + fa_availableIndicators.toString() + ')', String)
+      .option('--markdown_bid_pct <pct>', '% to mark down bid price for simulated quote', Number, c.markdown_bid_pct)
+      .option('--markup_ask_pct <pct>', ' % to mark up ask price for simulated quote', Number, c.markup_ask_pct)
 
       .action(function (selector, cmd) {        
         var s = {options: minimist(process.argv)}
