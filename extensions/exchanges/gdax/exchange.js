@@ -57,12 +57,13 @@ module.exports = function container (get, set, clear) {
 
   function websocketClient (product_ids) {
     if (c.gdax.websocket.enabled && !websocket_client) {
-      websocket_client = new Gdax.WebsocketClient(product_ids, 'wss://ws-feed.gdax.com', null, {heartbeat: true, channels: ['ticker', 'matches']})
+      websocket_client = new Gdax.WebsocketClient(product_ids, 'wss://ws-feed.gdax.com', null, {heartbeat: false, channels: ['ticker', 'matches']})
       websocket_client.on('open', function () {
-        websocket_subscribed = true;
+        websocket_subscribed = true
       })
       websocket_client.on('close', function () {
-        websocket_subscribed = false;
+        websocket_client = null
+        websocket_subscribed = false
       })
       websocket_client.on('error', function (err) {
         console.error(err)
@@ -74,7 +75,7 @@ module.exports = function container (get, set, clear) {
         } else if (message.type == 'match') {
           var max_length = (c.gdax.websocket.trade_history || 1000)
           if (websocket_trades.length > max_length ) {
-            websocket_trades.shift();
+            websocket_trades.shift()
           }
           websocket_trades.push({
             trade_id: message.trade_id,
