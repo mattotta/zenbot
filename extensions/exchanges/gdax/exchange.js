@@ -57,7 +57,19 @@ module.exports = function container (get, set, clear) {
 
   function websocketClient (product_ids) {
     if (c.gdax.websocket.enabled && !websocket_client) {
-      websocket_client = new Gdax.WebsocketClient(product_ids, 'wss://ws-feed.gdax.com', null, {heartbeat: false, channels: ['ticker', 'matches']})
+      var auth
+      if (c.gdax && c.gdax.key && c.gdax.key !== 'YOUR-API-KEY') {
+        auth = {key: c.gdax.key, secret: c.gdax.b64secret, passphrase: c.gdax.passphrase}
+      }
+      websocket_client = new Gdax.WebsocketClient(
+        product_ids, 
+        'wss://ws-feed.gdax.com',
+        auth,
+        {
+          heartbeat: false, 
+          channels: ['ticker', 'matches']
+        }
+      )
       websocket_client.on('open', function () {
         websocket_subscribed = true
       })
