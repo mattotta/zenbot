@@ -24,7 +24,7 @@ module.exports = {
       } else if (v.type === 'makertaker') {
         r[k] = (Math.random() > 0.5) ? 'maker' : 'taker';
       } else if (v.type === 'neutral_rate') {
-        var items = ['auto', 'auto_trend'];
+        var items = ['auto', 'auto_trend', 'auto_new'];
         var index = Math.floor(Math.random() * items.length);
         r[k] = items[index];
       } else if (v.type === 'neutral_rate_min') {
