@@ -36,17 +36,23 @@ module.exports = function container (get, set, clear) {
         get('lib.stddev')(s, 'trend_ema_stddev', s.options.trend_ema, 'trend_ema_rate')
       }
       else if (s.options.neutral_rate === 'auto_new') {
+        var trend_ema
         if (s.lookback[0] && s.lookback[0].trend_ema) {
-          s.period.trend_ema_stddev = s.lookback[0].trend_ema / s.options.trend_ema
+          trend_ema = s.lookback[0].trend_ema
         } else {
+          trend_ema = s.period.trend_ema
           s.period.trend_ema_stddev = s.period.trend_ema / s.options.trend_ema
         }
-        while (s.period.trend_ema_stddev > 1) {
-          s.period.trend_ema_stddev = s.period.trend_ema_stddev / 10
+        while (trend_ema > 1) {
+          trend_ema = trend_ema / 10
         }
+        s.period.trend_ema_stddev = trend_ema / s.options.trend_ema
       }
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
+      }
+      if (s.options.neutral_rate_min) {
+        s.period.trend_ema_stddev = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min)
       }
     },
 
