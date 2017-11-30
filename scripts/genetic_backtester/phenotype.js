@@ -23,6 +23,14 @@ module.exports = {
         r[k] = (Math.random() * (v.max - v.min)) + v.min;
       } else if (v.type === 'makertaker') {
         r[k] = (Math.random() > 0.5) ? 'maker' : 'taker';
+      } else if (v.type === 'neutral_rate') {
+        var items = ['auto', 'auto_trend'];
+        var index = Math.floor(Math.random() * items.length);
+        r[k] = items[index];
+      } else if (v.type === 'neutral_rate_min') {
+        var items = [0.1, 0.01, 0.001, 0.0001];
+        var index = Math.floor(Math.random() * items.length);
+        r[k] = items[index];
       } else if (v.type === 'sigmoidtanhrelu') {
         var items = ['sigmoid', 'tanh', 'relu'];
         var index = Math.floor(Math.random() * items.length);
