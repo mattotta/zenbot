@@ -58,7 +58,7 @@ module.exports = function container (get, set, clear) {
               so.end = tb(so.start).resize('1d').add(so.days).toMilliseconds()
             } else {
               so.end = tb('1d').toMilliseconds()
-              so.days = Math.floor((so.end - so.start) / 86400000)
+              so.days = Math.floor((so.end - so.start) / 86400000) + 1
             }
           }
         }
