@@ -53,8 +53,13 @@ module.exports = function container (get, set, clear) {
         })
         if (so.start) {
           so.start = moment(so.start).valueOf()
-          if (so.days && !so.end) {
-            so.end = tb(so.start).resize('1d').add(so.days).toMilliseconds()
+          if (!so.end) {
+            if (so.days) {
+              so.end = tb(so.start).resize('1d').add(so.days).toMilliseconds()
+            } else {
+              so.end = tb('1d').toMilliseconds()
+              so.days = Math.floor((so.end - so.start) / 86400000)
+            }
           }
         }
         if (so.end) {
