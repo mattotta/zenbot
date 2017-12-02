@@ -33,7 +33,7 @@ let OVERSOLD_RSI_PERIODS_MAX = 60;
 let iterationCount = 0;
 
 let runCommand = (taskStrategyName, phenotype, cb) => {
-  let commonArgs = `--strategy=${taskStrategyName} --period=${phenotype.period} --min_periods=${phenotype.min_periods} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
+  let commonArgs = `--strategy=${taskStrategyName} --period=${phenotype.period} --min_periods=${phenotype.min_periods} --markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
   let strategyArgs = {
     cci_srsi: `--cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant}`,
     srsi_macd: `--rsi_periods=${phenotype.rsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold}`,
@@ -46,7 +46,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
     trust_distrust: `--sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
-    ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto`
+    ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
   let command = `${zenbot_cmd} sim ${simArgs} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
@@ -72,6 +72,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     } catch (err) {
       console.log(`Bad output detected`);
       console.log(stdout);
+      console.log(err)
     }
 
     cb(null, result);
@@ -198,6 +199,20 @@ let RangeMakerTaker = () => {
   return r;
 };
 
+let RangeMaker = () => {
+  var r = {
+    type: 'maker'
+  };
+  return r;
+};
+
+let RangeTaker = () => {
+  var r = {
+    type: 'taker'
+  };
+  return r;
+};
+
 let RangeNeuralActivation = () => {
   var r = {
     type: 'sigmoidtanhrelu'
@@ -212,6 +227,13 @@ let RangeNeutralRate = () => {
   return r;
 };
 
+let RangeNeutralRateReverse = () => {
+  var r = {
+    type: 'neutral_rate_reverse'
+  };
+  return r;
+};
+
 let RangeNeutralRateMin = () => {
   var r = {
     type: 'neutral_rate_min'
@@ -222,12 +244,15 @@ let RangeNeutralRateMin = () => {
 let strategies = {
   cci_srsi: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     cci_periods: Range(1, 200),
@@ -243,12 +268,15 @@ let strategies = {
   },
   srsi_macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     rsi_periods: Range(1, 200),
@@ -265,12 +293,15 @@ let strategies = {
   },
   macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     ema_short_period: Range(1, 20),
@@ -283,12 +314,15 @@ let strategies = {
   },
   neural: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     neurons_1: Range(1, 200),
@@ -301,8 +335,11 @@ let strategies = {
   },
   reverse_trend_ema: {
     // -- common
-    period: RangePeriod(1, 30, 's'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -312,16 +349,20 @@ let strategies = {
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    neutral_rate_min: RangeNeutralRateMin(),
+    neutral_rate: RangeNeutralRateReverse(),
+    neutral_rate_min: RangeNeutralRateMin()
   },
   rsi: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     rsi_periods: Range(1, 200),
@@ -333,12 +374,15 @@ let strategies = {
   },
   sar: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(2, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     sar_af: RangeFloat(0.01, 1.0),
@@ -346,12 +390,15 @@ let strategies = {
   },
   speed: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     baseline_periods: Range(1, 5000),
@@ -361,6 +408,9 @@ let strategies = {
     // -- common
     period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -370,16 +420,20 @@ let strategies = {
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    neutral_rate_min: RangeNeutralRateMin(),
+    neutral_rate: RangeNeutralRate(),
+    neutral_rate_min: RangeNeutralRateMin()
   },
   trust_distrust: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     sell_threshold: Range(1, 100),
@@ -391,12 +445,15 @@ let strategies = {
   },
   ta_macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     // have to be minimum 2 because talib will throw an "TA_BAD_PARAM" error
@@ -410,17 +467,22 @@ let strategies = {
   },
   ta_ema: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    period: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
 
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
-    oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX)
+    oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
+    neutral_rate: RangeNeutralRate(),
+    neutral_rate_min: RangeNeutralRateMin()
   }
 };
 
@@ -436,9 +498,17 @@ console.log(`\n--==${VERSION}==--`);
 console.log(new Date().toUTCString() + `\n`);
 
 let argv = require('yargs').argv;
-let simArgs = (argv.selector) ? argv.selector : 'gdax.BTC-EUR';
+let simArgs = (argv.selector) ? argv.selector : 'gdax.BTC-EUR'
+if (argv.start) {
+  simArgs += ` --start=${argv.start}`;
+  if (!argv.days) {
+    simArgs += ' --days=0';
+  }
+}
 if (argv.days) {
   simArgs += ` --days=${argv.days}`;
+} else {
+  argv.days = 1;
 }
 if (argv.currency_capital) {
   simArgs += ` --currency_capital=${argv.currency_capital}`;
