@@ -249,7 +249,9 @@ module.exports = function container (get, set, clear) {
         opts.post_only = true
       }
       if (opts.order_type === 'taker') {
+        opts.funds = n(opts.total).add(n(opts.total).multiply(this.takerFee).divide(100)).format('0.00000000')
         delete opts.price
+        delete opts.size
         delete opts.post_only
         delete opts.cancel_after
         opts.type = 'market'
@@ -315,6 +317,18 @@ module.exports = function container (get, set, clear) {
           body = orders['~' + opts.order_id]
           body.status = 'done'
           body.done_reason = 'canceled'
+        }
+        if (typeof body.size === 'undefined' && body.filled_size) {
+          body.size = body.filled_size
+        }
+        if (typeof body.fees === 'undefined' && body.fill_fees) {
+          body.fees = body.fill_fees
+        }
+        if (typeof body.total === 'undefined' && body.executed_value) {
+          body.total = body.executed_value
+        }
+        if (typeof body.price === 'undefined' && body.total && body.size) {
+          body.price = n(body.executed_value).divide(body.filled_size).format('0.00000000')
         }
         cb(null, body)
       })
