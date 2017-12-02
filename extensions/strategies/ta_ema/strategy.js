@@ -11,6 +11,7 @@ module.exports = function container (get, set, clear) {
       this.option('min_periods', 'min. number of history periods', Number, 52)
       this.option('trend_ema', 'number of periods for trend EMA', Number, 20)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 0.06)
+      this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float', Number, 0)
       this.option('oversold_rsi_periods', 'number of periods for oversold RSI', Number, 20)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 30)
     },
@@ -32,8 +33,14 @@ module.exports = function container (get, set, clear) {
       if (s.options.neutral_rate === 'auto') {
         get('lib.stddev')(s, 'trend_ema_stddev', Math.floor(s.options.trend_ema / 2), 'trend_ema_rate')
       }
+      else if (s.options.neutral_rate === 'auto_trend') {
+        get('lib.stddev')(s, 'trend_ema_stddev', s.options.trend_ema, 'trend_ema_rate')
+      }
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
+      }
+      if (s.options.neutral_rate_min) {
+        s.period.trend_ema_stddev = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min)
       }
     },
 
