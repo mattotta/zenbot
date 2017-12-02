@@ -131,9 +131,11 @@ let processOutput = output => {
   delete r.selector;
   delete r.sell_pct;
   delete r.start;
+  delete r.end;
   delete r.stats;
   delete r.use_strategies;
   delete r.verbose;
+  delete r.silent;
 
   return {
     params: 'module.exports = ' + JSON.stringify(r),
