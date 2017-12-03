@@ -21,6 +21,9 @@ module.exports = function container (get, set, clear) {
       this.option('cmo_sma', 'cmo sma, default 6', Number, 6)
     },
     
+    /*
+    ./zenbot.sh sim --days=2 --avg_slippage_pct=0.5 --period=2m --profit_stop_enable_pct=7.5 --profit_stop_pct=1 --strategy=ts_crossover
+    */
     calculate: function (s) {
 
       get('lib.ta_cmo')(s, 'ta_cmo', s.options.cmo_length, "close")
@@ -54,7 +57,9 @@ module.exports = function container (get, set, clear) {
         }
       }
       if (typeof s.period.ta_adx === 'number') {
-        if (s.period.ta_adx < s.period.ta_cmo_sma) {
+        //console.log(s.period);
+                
+        if (s.period.ta_adx > 15 && s.period.ta_cmo_sma > 10) {
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -62,7 +67,7 @@ module.exports = function container (get, set, clear) {
           s.signal = !s.acted_on_trend ? 'buy' : null
           s.cancel_down = false
         }
-        else if (!s.cancel_down && s.period.ta_adx < (s.period.ta_cmo_sma * -1)) {
+        else if (!s.cancel_down && s.period.ta_adx < 15 && (s.period.ta_cmo_sma * -1) < 10) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }
@@ -77,11 +82,11 @@ module.exports = function container (get, set, clear) {
       var cols = []
       if (typeof s.period.ta_adx === 'number') {
         var color = 'grey'
-        if (s.period.ta_adx < s.period.ta_cmo_sma) {
+        if (s.period.ta_adx > 15 && s.period.ta_cmo_sma > 10) 
           color = 'green'
-        }else if (s.period.ta_adx < (s.period.ta_cmo_sma * -1)) {
+        else if (s.period.ta_adx < 15 && (s.period.ta_cmo_sma * -1) < 10) 
           color = 'red'
-        }
+        
         
         cols.push(z(8, n(s.period.ta_cmo_sma).format('0.00'), ' ')[color])
         
