@@ -15,28 +15,27 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 30)
       
       // new params
-      this.option('cmo_length', 'CMO length, default 34', Number, 13)
-      this.option('adx_length', 'ADX length, default 34', Number, 13)
+      this.option('cmo_length', 'CMO length, default 9', Number, 9)
+      this.option('adx_length', 'ADX length, default 14', Number, 14)
 
-      this.option('sma_length', 'SMA length, default 34', Number, 13)
       this.option('cmo_sma', 'cmo sma, default 6', Number, 6)
     },
     
     calculate: function (s) {
 
       get('lib.ta_cmo')(s, 'ta_cmo', s.options.cmo_length, "close")
-      
-      if(s.period["ta_cmo"]){
+      get('lib.ta_sma')(s, 'ta_cmo_sma', s.options.cmo_sma, "ta_cmo")
+
+      if(s.period.ta_cmo){
           //get('lib.sma')(s, 'ta_cmo_sma', s.options.cmo_sma, "ta_cmo")
           // console.log("period: ",s.period);
           //debugger;
-          
           get('lib.ta_adx')(s, 'ta_adx', s.options.adx_length)
-         
-          
-          if(s.period.ta_adx){
+
+          if(s.period.ta_adx && s.period.ta_cmo_sma){
             //debugger;
-            //console.log("cmo: " + s.period.ta_cmo + ", adx: " + s.period.ta_adx);
+            //console.log("cmo: " + s.period.ta_cmo +", cmo_sma: " + s.period.ta_cmo_sma + ", adx: " + s.period.ta_adx);
+           // console.log("cmo: " + s.period.ta_cmo + ", adx: " + s.period.ta_adx);
             //console.log(s.period.ta_cmo + "," + s.period.ta_adx)
           }
       }      
@@ -45,7 +44,7 @@ module.exports = function container (get, set, clear) {
     onPeriod: function (s, cb) {
       //debugger;
       
-      if (!s.in_preroll && typeof s.period.oversold_rsi === 'number') {
+      if (!s.in_preroll && typeof s.period.ta_cmo_sma === 'number') {
         if (s.oversold) {
           s.oversold = false
           s.trend = 'oversold'
@@ -55,7 +54,7 @@ module.exports = function container (get, set, clear) {
         }
       }
       if (typeof s.period.ta_adx === 'number') {
-        if (s.period.ta_adx > s.period.ta_cmo) {
+        if (s.period.ta_adx < s.period.ta_cmo_sma) {
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -63,7 +62,7 @@ module.exports = function container (get, set, clear) {
           s.signal = !s.acted_on_trend ? 'buy' : null
           s.cancel_down = false
         }
-        else if (!s.cancel_down && s.period.ta_adx < (s.period.ta_cmo * -1)) {
+        else if (!s.cancel_down && s.period.ta_adx < (s.period.ta_cmo_sma * -1)) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }
@@ -78,16 +77,16 @@ module.exports = function container (get, set, clear) {
       var cols = []
       if (typeof s.period.ta_adx === 'number') {
         var color = 'grey'
-        if (s.period.ta_cmo > s.period.ta_adx) {
+        if (s.period.ta_adx < s.period.ta_cmo_sma) {
           color = 'green'
-        }else if (s.period.ta_cmo < (s.period.ta_adx * -1)) {
+        }else if (s.period.ta_adx < (s.period.ta_cmo_sma * -1)) {
           color = 'red'
         }
         
-        cols.push(z(8, n(s.period.ta_cmo - s.period.ta_adx).format('0.000000'), ' ')['red'])
+        cols.push(z(8, n(s.period.ta_cmo_sma).format('0.00'), ' ')[color])
         
         if (s.period.ta_cmo) {
-          cols.push(z(8, n(s.period.ta_adx).format('0.0000'), ' ')[color])
+          cols.push(z(8, n(s.period.ta_adx).format('0.00'), ' ')[color])
         }
       }
       else {
