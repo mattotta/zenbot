@@ -14,6 +14,8 @@ let roundp = require('round-precision');
 let fs = require('fs');
 let GeneticAlgorithmCtor = require('geneticalgorithm');
 let StripAnsi = require('strip-ansi');
+let moment = require('moment');
+let tb = require('timebucket');
 
 let Phenotypes = require('./phenotype.js');
 
@@ -246,11 +248,11 @@ let RangeNeutralRateMin = () => {
 let strategies = {
   cci_srsi: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -270,11 +272,11 @@ let strategies = {
   },
   srsi_macd: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -295,11 +297,11 @@ let strategies = {
   },
   macd: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -316,11 +318,11 @@ let strategies = {
   },
   neural: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -337,7 +339,7 @@ let strategies = {
   },
   reverse_trend_ema: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -356,11 +358,11 @@ let strategies = {
   },
   rsi: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -376,11 +378,11 @@ let strategies = {
   },
   sar: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(2, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -392,11 +394,11 @@ let strategies = {
   },
   speed: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -408,7 +410,7 @@ let strategies = {
   },
   trend_ema: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -427,11 +429,11 @@ let strategies = {
   },
   trust_distrust: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -447,11 +449,11 @@ let strategies = {
   },
   ta_macd: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -469,11 +471,11 @@ let strategies = {
   },
   ta_ema: {
     // -- common
-    period: RangePeriod(1, 120, 's'),
+    period: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeMaker(),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
@@ -504,13 +506,13 @@ let simArgs = (argv.selector) ? argv.selector : 'gdax.BTC-EUR'
 if (argv.start) {
   simArgs += ` --start=${argv.start}`;
   if (!argv.days) {
-    simArgs += ' --days=0';
+    let start = moment(argv.start).valueOf();
+    let end = tb('1d').toMilliseconds();
+    argv.days = Math.floor((end - start) / 86400000) + 1;
   }
 }
 if (argv.days) {
   simArgs += ` --days=${argv.days}`;
-} else {
-  argv.days = 1;
 }
 if (argv.currency_capital) {
   simArgs += ` --currency_capital=${argv.currency_capital}`;

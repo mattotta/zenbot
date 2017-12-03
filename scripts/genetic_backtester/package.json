@@ -9,6 +9,8 @@
     "run-parallel-limit": "^1.0.3",
     "shelljs": "^0.7.8",
     "yargs": "^8.0.2",
-    "strip-ansi": "^4.0.0"
+    "strip-ansi": "^4.0.0",
+    "moment": "^2.18.1",
+    "timebucket": "^0.4.0"
   }
 }
