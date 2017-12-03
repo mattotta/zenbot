@@ -59,7 +59,7 @@ module.exports = function container (get, set, clear) {
       if (typeof s.period.ta_adx === 'number') {
         //console.log(s.period);
                 
-        if (s.period.ta_adx > 15 && s.period.ta_cmo_sma > 10) {
+        if (s.period.ta_adx > s.period.ta_cmo_sma) {
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -67,7 +67,7 @@ module.exports = function container (get, set, clear) {
           s.signal = !s.acted_on_trend ? 'buy' : null
           s.cancel_down = false
         }
-        else if (!s.cancel_down && s.period.ta_adx < 15 && (s.period.ta_cmo_sma * -1) < 10) {
+        else if (!s.cancel_down && s.period.ta_adx < (s.period.ta_cmo_sma * -1)) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }
@@ -82,11 +82,10 @@ module.exports = function container (get, set, clear) {
       var cols = []
       if (typeof s.period.ta_adx === 'number') {
         var color = 'grey'
-        if (s.period.ta_adx > 15 && s.period.ta_cmo_sma > 10) 
+        if (s.period.ta_adx > s.period.ta_cmo_sma) 
           color = 'green'
-        else if (s.period.ta_adx < 15 && (s.period.ta_cmo_sma * -1) < 10) 
+        else if (s.period.ta_adx < (s.period.ta_cmo_sma * -1)) 
           color = 'red'
-        
         
         cols.push(z(8, n(s.period.ta_cmo_sma).format('0.00'), ' ')[color])
         
