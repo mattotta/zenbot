@@ -44,13 +44,9 @@ module.exports = {
         var index = Math.floor(Math.random() * items.length);
         r[k] = items[index];
       } else if (v.type === 'period') {
-        var s = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
-        if (v.period instanceof Array) {
-          var index = Math.floor(Math.random() * v.period.length);
-          r[k] = s + v.period[index];
-        } else {
-          r[k] = s + v.period;
-        }
+        var items = ['1s', '2s', '3s', '5s', '7s', '9s', '12s', '15s', '18s', '22s', '26s', '30s', '36s', '48s', '60s', '75s', '90s','2m', '3m', '5m', '7m', '9m', '12m', '15m', '18m', '22ms', '26m', '30m', '36m', '48s', '60m', '75m', '90m']
+        var index = Math.floor(Math.random() * items.length);
+        r[k] = items[index];
       } else if (v.type === 'selector') {
         var index = Math.floor(Math.random() * v.items.length);
         r[k] = v.items[index];
