@@ -302,13 +302,13 @@ module.exports = function container (get, set, clear) {
                         if (key === 'l') {
                           listKeys()
                         } else if (key === 'b' && !info.ctrl ) {
-                          engine.executeSignal('buy')
+                          engine.executeSignal('buy', null, null, false, false)
                           console.log('\nmanual'.grey + ' limit ' + 'BUY'.green + ' command executed'.grey)
                         } else if (key === 'B' && !info.ctrl) {
                           engine.executeSignal('buy', null, null, false, true)
                           console.log('\nmanual'.grey + ' market ' + 'BUY'.green + ' command executed'.grey)
                         } else if (key === 's' && !info.ctrl) {
-                          engine.executeSignal('sell')
+                          engine.executeSignal('sell', null, null, false, false)
                           console.log('\nmanual'.grey + ' limit ' + 'SELL'.red + ' command executed'.grey)
                         } else if (key === 'S' && !info.ctrl) {
                           engine.executeSignal('sell', null, null, false, true)

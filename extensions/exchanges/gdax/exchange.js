@@ -1,7 +1,7 @@
 var Gdax = require('gdax')
   , path = require('path')
   , colors = require('colors')
-  , numbro = require('numbro')
+  , n = require('numbro')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf')
@@ -56,14 +56,15 @@ module.exports = function container (get, set, clear) {
   var websocket_trades = []
 
   function websocketClient (product_ids) {
-    if (c.gdax.websocket.enabled && !websocket_client) {
+    if (c.gdax.websocket && c.gdax.websocket.enabled && !websocket_client) {
+      var feed = c.gdax.websocket.feed || 'wss://ws-feed.gdax.com'
       var auth
       if (c.gdax && c.gdax.key && c.gdax.key !== 'YOUR-API-KEY') {
         auth = {key: c.gdax.key, secret: c.gdax.b64secret, passphrase: c.gdax.passphrase}
       }
       websocket_client = new Gdax.WebsocketClient(
-        product_ids, 
-        'wss://ws-feed.gdax.com',
+        product_ids,
+        feed,
         auth,
         {
           heartbeat: false, 
@@ -260,6 +261,10 @@ module.exports = function container (get, set, clear) {
         opts.time_in_force = 'GTT'
       }
       delete opts.order_type
+      delete opts.total
+      delete opts.orig_size
+      delete opts.remaining_size
+      delete opts.orig_price
       client.buy(opts, function (err, resp, body) {
         if (body && body.message === 'Insufficient funds') {
           var order = {
@@ -291,6 +296,10 @@ module.exports = function container (get, set, clear) {
         opts.time_in_force = 'GTT'
       }
       delete opts.order_type
+      delete opts.total
+      delete opts.orig_size
+      delete opts.remaining_size
+      delete opts.orig_price
       client.sell(opts, function (err, resp, body) {
         if (body && body.message === 'Insufficient funds') {
           var order = {
