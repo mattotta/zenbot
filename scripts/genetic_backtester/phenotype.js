@@ -15,10 +15,10 @@ module.exports = {
       if (v.type === 'int') {
         r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
       } else if (v.type === 'int0') {
-	r[k] = 0;
-	if (Math.random() >= 0.5) {
-	  r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
-	}
+        r[k] = 0;
+        if (Math.random() >= 0.5) {
+          r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
+        }
       } else if (v.type === 'float') {
         r[k] = (Math.random() * (v.max - v.min)) + v.min;
       } else if (v.type === 'makertaker') {
@@ -45,7 +45,15 @@ module.exports = {
         r[k] = items[index];
       } else if (v.type === 'period') {
         var s = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
-        r[k] = s + v.period;
+        if (v.period instanceof Array) {
+          var index = Math.floor(Math.random() * v.period.length);
+          r[k] = s + v.period[index];
+        } else {
+          r[k] = s + v.period;
+        }
+      } else if (v.type === 'selector') {
+        var index = Math.floor(Math.random() * v.items.length);
+        r[k] = v.items[index];
       }
     }
     return r;
@@ -77,7 +85,7 @@ module.exports = {
   },
 
   fitness: function(phenotype) {
-    if (typeof phenotype.sim === 'undfined') return 0;
+    if (typeof phenotype.sim === 'undefined') return 0;
     
     var vsBuyHoldRate = (phenotype.sim.vsBuyHold / 50);
     var wlRatioRate = 1.0 / (1.0 + Math.pow(2.71828, -(phenotype.sim.wins - phenotype.sim.losses)));

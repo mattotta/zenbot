@@ -34,6 +34,14 @@ let OVERSOLD_RSI_PERIODS_MAX = 60;
 
 let iterationCount = 0;
 
+console.log(`\n--==${VERSION}==--`);
+console.log(new Date().toUTCString() + `\n`);
+
+let argv = require('yargs').argv;
+
+let selector = (argv.selector) ? argv.selector : 'gdax.BTC-EUR';
+let selectors = selector.split(',')
+
 let runCommand = (taskStrategyName, phenotype, cb) => {
   let commonArgs = `--strategy=${taskStrategyName} --period=${phenotype.period} --min_periods=${phenotype.min_periods} --markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
   let strategyArgs = {
@@ -51,7 +59,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
-  let command = `${zenbot_cmd} sim ${simArgs} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
+  let command = `${zenbot_cmd} sim ${phenotype.selector}${simArgs} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
   console.log(`[ ${iterationCount++}/${populationSize * selectedStrategies.length} ] ${command}`);
 
   phenotype['sim'] = {};
@@ -70,6 +78,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     try {
       result = processOutput(stdout);
       phenotype['sim'] = result;
+      result['selector'] = phenotype.selector;
       result['fitness'] = Phenotypes.fitness(phenotype);
     } catch (err) {
       console.log(`Bad output detected`);
@@ -245,10 +254,19 @@ let RangeNeutralRateMin = () => {
   return r;
 };
 
+let RangeSelector = (selectors) => {
+  var r = {
+    type: 'selector',
+    items: selectors
+  };
+  return r;
+};
+
 let strategies = {
   cci_srsi: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -272,7 +290,8 @@ let strategies = {
   },
   srsi_macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -297,7 +316,8 @@ let strategies = {
   },
   macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -316,9 +336,11 @@ let strategies = {
     overbought_rsi_periods: Range(1, 50),
     overbought_rsi: Range(20, 100)
   },
+  /*
   neural: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -337,9 +359,11 @@ let strategies = {
     decay: Range(1, 10),
     learns: Range(1, 200)
   },
+  */
   reverse_trend_ema: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -358,7 +382,8 @@ let strategies = {
   },
   rsi: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -378,7 +403,8 @@ let strategies = {
   },
   sar: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(2, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -392,9 +418,11 @@ let strategies = {
     sar_af: RangeFloat(0.01, 1.0),
     sar_max_af: RangeFloat(0.01, 1.0)
   },
+  /*
   speed: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -408,9 +436,11 @@ let strategies = {
     baseline_periods: Range(1, 5000),
     trigger_factor: RangeFloat(0.1, 10)
   },
+  */
   trend_ema: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -429,7 +459,8 @@ let strategies = {
   },
   trust_distrust: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -449,7 +480,8 @@ let strategies = {
   },
   ta_macd: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -471,7 +503,8 @@ let strategies = {
   },
   ta_ema: {
     // -- common
-    period: RangePeriod(1, 120, 'm'),
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -482,7 +515,7 @@ let strategies = {
     profit_stop_pct: Range(1, 20),
 
     // -- strategy
-    trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
+    trend_ema: Range(2, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
     neutral_rate: RangeNeutralRate(),
@@ -498,11 +531,7 @@ let allStrategyNames = () => {
   return r;
 };
 
-console.log(`\n--==${VERSION}==--`);
-console.log(new Date().toUTCString() + `\n`);
-
-let argv = require('yargs').argv;
-let simArgs = (argv.selector) ? argv.selector : 'gdax.BTC-EUR'
+let simArgs = '';
 if (argv.start) {
   simArgs += ` --start=${argv.start}`;
   if (!argv.days) {
@@ -528,6 +557,7 @@ simArgs += ` --filename=none --silent`;
 let strategyName = (argv.use_strategies) ? argv.use_strategies : 'all';
 let populationFileName = (argv.population_data) ? argv.population_data : null;
 let populationSize = (argv.population) ? argv.population : 100;
+let threadCount = (argv.threads) ? argv.threads : PARALLEL_LIMIT;
 
 console.log(`Backtesting strategy ${strategyName} ...`);
 console.log(`Creating population of ${populationSize} ...\n`);
@@ -571,7 +601,9 @@ let generationCount = 1;
 let simulateGeneration = () => {
   console.log(`\n\n=== Simulating generation ${generationCount++} ===\n`);
 
-  runUpdate(argv.days, argv.selector);
+  selectors.forEach(function(s) {
+    runUpdate(argv.days, s);
+  })
 
   iterationCount = 1;
   let tasks = selectedStrategies.map(v => pools[v]['pool'].population().map(phenotype => {
@@ -580,7 +612,7 @@ let simulateGeneration = () => {
     };
   })).reduce((a, b) => a.concat(b));
 
-  parallel(tasks, PARALLEL_LIMIT, (err, results) => {
+  parallel(tasks, threadCount, (err, results) => {
     console.log("\Generation complete, saving results...");
     results = results.filter(function(r) {
       return !!r;
@@ -588,8 +620,8 @@ let simulateGeneration = () => {
 
     results.sort((a, b) => (a.fitness < b.fitness) ? 1 : ((b.fitness < a.fitness) ? -1 : 0));
 
-    let fieldsGeneral = ['fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days', 'params'];
-    let fieldNamesGeneral = ['Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days', 'Full Parameters'];
+    let fieldsGeneral = ['selector', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days', 'params'];
+    let fieldNamesGeneral = ['Selector', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days', 'Full Parameters'];
 
     let csv = json2csv({
       data: results,
@@ -598,12 +630,12 @@ let simulateGeneration = () => {
     });
 
     let fileDate = Math.round(+new Date() / 1000);
-    let fileName = `simulations/backtesting_${fileDate}.csv`;
+    let fileName = `simulations/backtesting_${fileDate}_gen_${generationCount}.csv`;
     fs.writeFile(fileName, csv, err => {
       if (err) throw err;
     });
 
-    let fileNameJSON = `simulations/backtesting_${fileDate}.json`;
+    let fileNameJSON = `simulations/backtesting_${fileDate}_gen_${generationCount}.json`;
     fs.writeFile(fileNameJSON, JSON.stringify(results, null, 2), err => {
       if (err) throw err;
     });
