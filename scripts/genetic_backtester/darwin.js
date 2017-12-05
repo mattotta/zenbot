@@ -336,7 +336,6 @@ let strategies = {
     overbought_rsi_periods: Range(1, 50),
     overbought_rsi: Range(20, 100)
   },
-  /*
   neural: {
     // -- common
     selector: RangeSelector(selectors),
@@ -359,7 +358,6 @@ let strategies = {
     decay: Range(1, 10),
     learns: Range(1, 200)
   },
-  */
   reverse_trend_ema: {
     // -- common
     selector: RangeSelector(selectors),
@@ -418,7 +416,6 @@ let strategies = {
     sar_af: RangeFloat(0.01, 1.0),
     sar_max_af: RangeFloat(0.01, 1.0)
   },
-  /*
   speed: {
     // -- common
     selector: RangeSelector(selectors),
@@ -436,7 +433,6 @@ let strategies = {
     baseline_periods: Range(1, 5000),
     trigger_factor: RangeFloat(0.1, 10)
   },
-  */
   trend_ema: {
     // -- common
     selector: RangeSelector(selectors),

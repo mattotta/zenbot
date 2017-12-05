@@ -15,7 +15,7 @@ module.exports = function container (get, set, clear) {
       this.option('up_trend_threshold', 'threshold to trigger a buy signal', Number, 0)
       this.option('down_trend_threshold', 'threshold to trigger a sold signal', Number, 0)
       this.option('overbought_rsi_periods', 'number of periods for overbought RSI', Number, 25)
-      this.option('overbought_rsi', 'sold when RSI exceeds this value', Number, 70)
+      this.option('overbought_rsi', 'sell when RSI exceeds this value', Number, 70)
     },
 
     calculate: function (s) {
@@ -25,7 +25,7 @@ module.exports = function container (get, set, clear) {
         get('lib.rsi')(s, 'overbought_rsi', s.options.overbought_rsi_periods)
         if (!s.in_preroll && s.period.overbought_rsi >= s.options.overbought_rsi && !s.overbought) {
           s.overbought = true
-          if (s.options.mode === 'sim' && s.options.verbose) console.log(('\noverbought at ' + s.period.overbought_rsi + ' RSI, preparing to sold\n').cyan)
+          if (s.options.mode === 'sim' && s.options.verbose) console.log(('\noverbought at ' + s.period.overbought_rsi + ' RSI, preparing to sell\n').cyan)
         }
       }
 
@@ -47,7 +47,7 @@ module.exports = function container (get, set, clear) {
         if (s.overbought) {
           s.overbought = false
           s.trend = 'overbought'
-          s.signal = 'sold'
+          s.signal = 'sell'
           return cb()
         }
       }

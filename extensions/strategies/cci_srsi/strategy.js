@@ -29,8 +29,8 @@ module.exports = function container (get, set, clear) {
       if (typeof s.period.trend_ema !== 'undefined')
         s.trend = s.period.trend_ema > s.lookback[0].trend_ema ? 'up' : 'down'
 
-		  // compute Stochastic RSI
-		  get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
+      // compute Stochastic RSI
+      get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
 
       // compute CCI
       get('lib.cci')(s, 'cci', s.options.cci_periods, s.options.constant)
@@ -46,37 +46,37 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
-    	if (!s.in_preroll && typeof s.trend !== 'undefined') {
+      if (!s.in_preroll && typeof s.trend !== 'undefined') {
 
         // Sideways Market
         if (s.period.acc < s.options.ema_acc) {
           // Buy signal
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
-  				  if (!s.cci_fromAbove && !s.rsi_fromAbove) {
+              if (!s.cci_fromAbove && !s.rsi_fromAbove) {
               s.signal = 'buy'
             }
           }
           // Sell signal
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-                s.signal = 'sell'
+              s.signal = 'sell'
             }
           }
           //cb()
         }
         // Buy signal
         if (s.trend === 'up') {
-        	if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
-  				  if (!s.cci_fromAbove && !s.rsi_fromAbove) {
+          if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
+            if (!s.cci_fromAbove && !s.rsi_fromAbove) {
               s.signal = 'buy'
             }
           }
         }
-			  // Sell signal
+        // Sell signal
         if (s.trend === 'down') {
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-                s.signal = 'sell'
+              s.signal = 'sell'
             }
           }
         }
@@ -101,6 +101,6 @@ module.exports = function container (get, set, clear) {
       }
       return cols
     }
-	}
+  }
 }
 /* Made by talvasconcelos*/
