@@ -439,7 +439,6 @@ module.exports = function container (get, set, clear) {
                           console.log('\nDumping statistics...'.grey)
                           printTrade(false, true)
                         } else if (key === 'D' && !info.ctrl) {
-                          
                           console.log('\nDumping statistics...'.grey)
                           toggleStats()
                         } else if (info.name === 'c' && info.ctrl) {
