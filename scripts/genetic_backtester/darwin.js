@@ -59,7 +59,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
-  let command = `${zenbot_cmd} sim ${phenotype.selector}${simArgs} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
+  let command = `${zenbot_cmd} sim ${phenotype.selector} ${simArgs.toString()} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
   console.log(`[ ${iterationCount++}/${populationSize * selectedStrategies.length} ] ${command}`);
 
   phenotype['sim'] = {};
@@ -531,28 +531,45 @@ let allStrategyNames = () => {
   return r;
 };
 
-let simArgs = '';
+let simArgs = {
+  filename: 'none',
+  silent: true,
+
+  toString: function() {
+    let list = [];
+    for(let name in this) {
+      if (this.hasOwnProperty(name) && typeof this[name] !== 'function') {
+        if (this[name] === true) {
+          list.push('--' + name);
+        } else if (this[name] !== false) {
+          list.push('--' + name + '=' + this[name]);
+        }
+      }
+    }
+    return list.join(' ');
+  }
+};
+
 if (argv.start) {
-  simArgs += ` --start=${argv.start}`;
+  simArgs.start = argv.start;
   if (!argv.days) {
     let start = moment(argv.start).valueOf();
     let end = tb('1d').toMilliseconds();
-    argv.days = Math.floor((end - start) / 86400000) + 1;
+    simArgs.days = Math.floor((end - start) / 86400000) + 1;
   }
 }
 if (argv.days) {
-  simArgs += ` --days=${argv.days}`;
+  simArgs.days = argv.days;
 }
 if (argv.currency_capital) {
-  simArgs += ` --currency_capital=${argv.currency_capital}`;
+  simArgs.currency_capital = argv.currency_capital;
 }
 if (argv.asset_capital) {
-  simArgs += ` --asset_capital=${argv.asset_capital}`;
+  simArgs.asset_capital = argv.asset_capital;
 }
 if (argv.symmetrical) {
-  simArgs += ` --symmetrical=true`;
+  simArgs.symmetrical = 'true';
 }
-simArgs += ` --filename=none --silent`;
 
 let strategyName = (argv.use_strategies) ? argv.use_strategies : 'all';
 let populationFileName = (argv.population_data) ? argv.population_data : null;
@@ -601,8 +618,14 @@ let generationCount = 1;
 let simulateGeneration = () => {
   console.log(`\n\n=== Simulating generation ${generationCount++} ===\n`);
 
+  if (!argv.days && argv.start) {
+    let start = moment(argv.start).valueOf();
+    let end = tb('1d').toMilliseconds();
+    simArgs.days = Math.floor((end - start) / 86400000) + 1;
+  }
+
   selectors.forEach(function(s) {
-    runUpdate(argv.days, s);
+    runUpdate(simArgs.days, s);
   })
 
   iterationCount = 1;
