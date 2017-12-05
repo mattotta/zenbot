@@ -56,7 +56,9 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
     trust_distrust: `--sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
-    ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`
+    ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
+    ts_crossover: `--trend_ema=${phenotype.trend_ema} --cmo_length=${phenotype.cmo_length} --adx_length=${phenotype.adx_length} --cmo_sma=${phenotype.cmo_sma}`,
+    ts_crossover2: `--emalen1=${phenotype.emalen1} --smalen1=${phenotype.smalen1} --smalen2=${phenotype.smalen2}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
   let command = `${zenbot_cmd} sim ${phenotype.selector} ${simArgs.toString()} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
@@ -516,6 +518,43 @@ let strategies = {
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
     neutral_rate: RangeNeutralRate(),
     neutral_rate_min: RangeNeutralRateMin()
+  },
+  ts_crossover: {
+    // -- common
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
+    min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeTaker(),
+    sell_stop_pct: Range0(1, 50),
+    buy_stop_pct: Range0(1, 50),
+    profit_stop_enable_pct: Range0(1, 20),
+    profit_stop_pct: Range(1, 20),
+
+    // -- strategy
+    trend_ema: Range(2, TREND_EMA_MAX),
+    cmo_length: Range(1, 100),
+    adx_length: Range(1, 100),
+    cmo_sma: Range(1, 100)
+  },
+  ts_crossover2: {
+    // -- common
+    selector: RangeSelector(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
+    min_periods: Range(1, 100),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeTaker(),
+    sell_stop_pct: Range0(1, 50),
+    buy_stop_pct: Range0(1, 50),
+    profit_stop_enable_pct: Range0(1, 20),
+    profit_stop_pct: Range(1, 20),
+
+    // -- strategy
+    emalen1: Range(1, 100),
+    smalen1: Range(1, 100),
+    smalen2: Range(1, 100)
   }
 };
 
@@ -648,13 +687,17 @@ let simulateGeneration = () => {
       fieldNames: fieldNamesGeneral
     });
 
-    let fileDate = Math.round(+new Date() / 1000);
-    let fileName = `simulations/backtesting_${fileDate}_gen_${generationCount}.csv`;
+    let fileIdentifier = Math.round(+new Date() / 1000);
+    if (selectors.length === 1) {
+      fileIdentifier = selectors[0] + '_' + fileIdentifier;
+    }
+
+    let fileName = `simulations/backtesting_${fileIdentifier}_gen_${generationCount}.csv`;
     fs.writeFile(fileName, csv, err => {
       if (err) throw err;
     });
 
-    let fileNameJSON = `simulations/backtesting_${fileDate}_gen_${generationCount}.json`;
+    let fileNameJSON = `simulations/backtesting_${fileIdentifier}_gen_${generationCount}.json`;
     fs.writeFile(fileNameJSON, JSON.stringify(results, null, 2), err => {
       if (err) throw err;
     });
@@ -664,9 +707,8 @@ let simulateGeneration = () => {
       poolData[v] = pools[v]['pool'].population();
     });
 
-    let poolFileName = `simulations/generation_data_${fileDate}_gen_${generationCount}.json`;
-    let poolDataJSON = JSON.stringify(poolData, null, 2);
-    fs.writeFile(poolFileName, poolDataJSON, err => {
+    let poolFileName = `simulations/generation_data_${fileIdentifier}_gen_${generationCount}.json`;
+    fs.writeFile(poolFileName, JSON.stringify(poolData, null, 2), err => {
       if (err) throw err;
     });
 
