@@ -648,10 +648,10 @@ selectedStrategies.forEach(function(v) {
   }
 });
 
-let generationCount = 1;
+let generationCount = 0;
 
 let simulateGeneration = () => {
-  console.log(`\n\n=== Simulating generation ${generationCount++} ===\n`);
+  console.log(`\n\n=== Simulating generation ${++generationCount} ===\n`);
 
   if (!argv.days && argv.start) {
     let start = moment(argv.start).valueOf();
