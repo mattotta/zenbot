@@ -49,6 +49,7 @@ module.exports = function container (get, set, clear) {
       if (cluster.isMaster) {
         get('lib.ema')(s, 'neural', s.options.neural)
         if (global.forks < s.options.threads) { cluster.fork(); global.forks++; }
+        cluster.on('exit', (code) => { process.exit(code); });
       }
       if (cluster.isWorker) {
         get('lib.ema')(s, 'neural', s.options.neural)
@@ -106,8 +107,9 @@ module.exports = function container (get, set, clear) {
     },
     onReport: function (s) {
       cols = []
-      cols.push(z(8, n(global.mean).format('0000.00'), ' ')[global.meanp > global.mean ? 'green' : 'red'])
-      cols.push(z(8, n(global.meanp).format('0000.00'), ' ')[global.meanp > global.mean ? 'green' : 'red'])
+      cols.push(z(8, n(global.mean).format('00000.000'), ' ')[global.meanp > global.mean ? 'green' : 'red'])
+      cols.push('    ')
+      cols.push(z(8, n(global.meanp).format('00000.000'), ' ')[global.meanp > global.mean ? 'green' : 'red'])
       return cols
     },
   }
