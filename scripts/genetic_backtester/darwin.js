@@ -62,7 +62,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
   let command = `${zenbot_cmd} sim ${phenotype.selector} ${simArgs.toString()} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
-  console.log(`[ ${iterationCount++}/${populationSize * selectedStrategies.length} ] ${command}`);
+  console.log(`[ ${moment().format('YYYY-MM-DD HH:mm:ss')} - ${iterationCount++}/${populationSize * selectedStrategies.length} ] ${command}`);
 
   phenotype['sim'] = {};
 
