@@ -57,8 +57,8 @@ module.exports = function container (get, set, clear) {
         var tlp = []
         var tll = []
         if (s.lookback[s.options.min_periods]) {
-          for (let i = 0; i < s.options.min_periods; i++) { tll.push(s.lookback[i].close) }
-          for (let i = 0; i < s.options.min_predict; i++) { tlp.push(s.lookback[i].close) }
+          for (let i = 0; i < s.options.min_periods; i++) { if (typeof s.lookback[i] !== 'undefined') { tll.push(s.lookback[i].close) } }
+          for (let i = 0; i < s.options.min_predict; i++) { if (typeof s.lookback[i] !== 'undefined') { tlp.push(s.lookback[i].close) } }
           var my_data = tll.reverse()
           var learn = function () {
             //Learns
