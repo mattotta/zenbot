@@ -147,6 +147,7 @@ let processOutput = output => {
   delete r.end;
   delete r.stats;
   delete r.use_strategies;
+  delete r.show_options;
   delete r.verbose;
   delete r.silent;
 
@@ -577,7 +578,7 @@ let simArgs = {
         if (this[name] === true) {
           list.push('--' + name);
         } else if (this[name] !== false) {
-          list.push('--' + name + '=' + this[name]);
+          list.push('--' + name + '="' + this[name] + '"');
         }
       }
     }
