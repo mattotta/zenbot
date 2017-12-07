@@ -1,4 +1,4 @@
-var z = require('zero-fill')
+let z = require('zero-fill')
   , n = require('numbro')
 
 module.exports = function container (get, set, clear) {
@@ -14,10 +14,11 @@ module.exports = function container (get, set, clear) {
       this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float', Number, 0)
       this.option('oversold_rsi_periods', 'number of periods for oversold RSI', Number, 14)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
+      this.option('ema_source', 'buy when RSI reaches this value', String, 'close')
     },
 
     calculate: function (s) {
-      get('lib.ema')(s, 'trend_ema', s.options.trend_ema)
+      get('lib.ema')(s, 'trend_ema', s.options.trend_ema, s.options.ema_source)
       if (s.options.oversold_rsi) {
         // sync RSI display with oversold RSI periods
         s.options.rsi_periods = s.options.oversold_rsi_periods
@@ -39,9 +40,6 @@ module.exports = function container (get, set, clear) {
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
       }
-      if (s.options.neutral_rate_min) {
-        s.period.trend_ema_stddev = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min)
-      }
     },
 
     onPeriod: function (s, cb) {
@@ -55,7 +53,11 @@ module.exports = function container (get, set, clear) {
         }
       }
       if (typeof s.period.trend_ema_stddev === 'number') {
-        if (s.period.trend_ema_rate > s.period.trend_ema_stddev) {
+        let ema = s.period.trend_ema_stddev
+        if (s.options.neutral_rate_min) {
+          ema = Math.max(ema, s.options.neutral_rate_min)
+        }
+        if (s.period.trend_ema_rate > ema) {
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -63,7 +65,7 @@ module.exports = function container (get, set, clear) {
           s.signal = !s.acted_on_trend ? 'buy' : null
           s.cancel_down = false
         }
-        else if (!s.cancel_down && s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
+        else if (!s.cancel_down && s.period.trend_ema_rate < (ema * -1)) {
           if (s.trend !== 'down') {
             s.acted_on_trend = false
           }
@@ -75,13 +77,17 @@ module.exports = function container (get, set, clear) {
     },
 
     onReport: function (s) {
-      var cols = []
+      let cols = []
       if (typeof s.period.trend_ema_stddev === 'number') {
-        var color = 'grey'
-        if (s.period.trend_ema_rate > s.period.trend_ema_stddev) {
+        let ema = s.period.trend_ema_stddev
+        if (s.options.neutral_rate_min) {
+          ema = Math.max(ema, s.options.neutral_rate_min)
+        }
+        let color = 'grey'
+        if (s.period.trend_ema_rate > ema) {
           color = 'green'
         }
-        else if (s.period.trend_ema_rate < (s.period.trend_ema_stddev * -1)) {
+        else if (s.period.trend_ema_rate < (ema * -1)) {
           color = 'red'
         }
         cols.push(z(8, n(s.period.trend_ema_rate).format('0.0000'), ' ')[color])
