@@ -21,7 +21,7 @@ let Phenotypes = require('./phenotype.js');
 
 let VERSION = 'Zenbot 4 Genetic Backtester v0.2';
 
-let PARALLEL_LIMIT = require('os').cpus().length;
+let PARALLEL_LIMIT = (process.env.PARALLEL_LIMIT && +process.env.PARALLEL_LIMIT) || require('os').cpus().length;
 
 let TREND_EMA_MIN = 1;
 let TREND_EMA_MAX = 60;
@@ -83,7 +83,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
       result['selector'] = phenotype.selector;
       result['fitness'] = Phenotypes.fitness(phenotype);
     } catch (err) {
-      console.log(`Bad output detected`);
+      console.log(`Bad output detected`, err.toString());
       console.log(stdout);
       console.log(err)
     }
@@ -141,7 +141,6 @@ let processOutput = output => {
   delete r.order_adjust_time;
   delete r.population;
   delete r.population_data;
-  delete r.selector;
   delete r.sell_pct;
   delete r.start;
   delete r.end;
@@ -166,6 +165,7 @@ let processOutput = output => {
     order_type: params.order_type,
     roi: roi,
     wlRatio: losses > 0 ? roundp(wins / losses, 3) : 'Infinity',
+    selector: params.selector,
     strategy: params.strategy,
     frequency: roundp((wins + losses) / days, 3)
   };
