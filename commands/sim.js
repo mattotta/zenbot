@@ -19,7 +19,7 @@ module.exports = function container (get, set, clear) {
       .option('--filename <filename>', 'filename for the result output (ex: result.html). "none" to disable', String, c.filename)
       .option('--start <timestamp>', 'start at timestamp')
       .option('--end <timestamp>', 'end at timestamp')
-      .option('--days <days>', 'set duration by day count', Number, c.days)
+      .option('--days <days>', 'set duration by day count', Number)
       .option('--currency_capital <amount>', 'amount of start capital in currency', Number, c.currency_capital)
       .option('--asset_capital <amount>', 'amount of start capital in asset', Number, c.asset_capital)
       .option('--avg_slippage_pct <pct>', 'avg. amount of slippage to apply to trades', Number, c.avg_slippage_pct)
