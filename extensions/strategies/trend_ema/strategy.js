@@ -15,6 +15,7 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_rsi_periods', 'number of periods for oversold RSI', Number, 14)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('ema_source', 'buy when RSI reaches this value', String, 'close')
+      this.option('reversed', 'act reversed on trend', Number, 0)
     },
 
     calculate: function (s) {
@@ -36,6 +37,19 @@ module.exports = function container (get, set, clear) {
       }
       else if (s.options.neutral_rate === 'auto_trend') {
         get('lib.stddev')(s, 'trend_ema_stddev', s.options.trend_ema, 'trend_ema_rate')
+      }
+      else if (s.options.neutral_rate === 'auto_new') {
+        var trend_ema
+        if (s.lookback[0] && s.lookback[0].trend_ema) {
+          trend_ema = s.lookback[0].trend_ema
+        } else {
+          trend_ema = s.period.trend_ema
+          s.period.trend_ema_stddev = s.period.trend_ema / s.options.trend_ema
+        }
+        while (trend_ema > 1) {
+          trend_ema = trend_ema / 10
+        }
+        s.period.trend_ema_stddev = trend_ema / s.options.trend_ema
       }
       else {
         s.period.trend_ema_stddev = s.options.neutral_rate
@@ -62,7 +76,7 @@ module.exports = function container (get, set, clear) {
             s.acted_on_trend = false
           }
           s.trend = 'up'
-          s.signal = !s.acted_on_trend ? 'buy' : null
+          s.signal = !s.acted_on_trend ? (s.options.reversed ? 'sell' : 'buy') : null
           s.cancel_down = false
         }
         else if (!s.cancel_down && s.period.trend_ema_rate < (ema * -1)) {
@@ -70,7 +84,7 @@ module.exports = function container (get, set, clear) {
             s.acted_on_trend = false
           }
           s.trend = 'down'
-          s.signal = !s.acted_on_trend ? 'sell' : null
+          s.signal = !s.acted_on_trend ? (s.options.reversed ? 'buy' : 'sell') : null
         }
       }
       cb()

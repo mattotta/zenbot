@@ -45,15 +45,14 @@ let selectors = selector.split(',')
 let runCommand = (taskStrategyName, phenotype, cb) => {
   let commonArgs = `--strategy=${taskStrategyName} --period=${phenotype.period} --min_periods=${phenotype.min_periods} --markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
   let strategyArgs = {
-    cci_srsi: `--cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant}`,
+    cci_srsi: `--cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant} --reversed=${phenotype.reversed}`,
     srsi_macd: `--rsi_periods=${phenotype.rsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold}`,
     macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
     neural: `--activation_1_type=${phenotype.activation_1_type} --neurons_1=${phenotype.neurons_1} --depth=${phenotype.depth} --momentum=${phenotype.momentum} --decay=${phenotype.decay} --min_predict=${phenotype.min_predict} --learns=${phenotype.learns}`,
-    reverse_trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min}`,
     rsi: `--rsi_periods=${phenotype.rsi_periods} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --rsi_recover=${phenotype.rsi_recover} --rsi_drop=${phenotype.rsi_drop} --rsi_divisor=${phenotype.rsi_divisor}`,
     sar: `--sar_af=${phenotype.sar_af} --sar_max_af=${phenotype.sar_max_af}`,
     speed: `--baseline_periods=${phenotype.baseline_periods} --trigger_factor=${phenotype.trigger_factor}`,
-    trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
+    trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
     trust_distrust: `--sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
     ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
@@ -289,7 +288,8 @@ let strategies = {
     overbought_rsi: Range(1, 100),
     oversold_cci: Range(-100, 100),
     overbought_cci: Range(1, 100),
-    constant: RangeFloat(0.001, 0.05)
+    constant: RangeFloat(0.001, 0.05),
+    reversed: Range(0, 1)
   },
   srsi_macd: {
     // -- common
@@ -360,26 +360,6 @@ let strategies = {
     momentum: Range(0, 100),
     decay: Range(1, 10),
     learns: Range(1, 200)
-  },
-  reverse_trend_ema: {
-    // -- common
-    selector: RangeSelector(selectors),
-    period: RangePeriod(1, 120, ['s', 'm']),
-    min_periods: Range(1, 100),
-    markdown_buy_pct: RangeFloat(0, 0),
-    markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeTaker(),
-    sell_stop_pct: Range0(1, 50),
-    buy_stop_pct: Range0(1, 50),
-    profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1, 20),
-
-    // -- strategy
-    trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
-    oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
-    oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    neutral_rate: RangeNeutralRateReverse(),
-    neutral_rate_min: RangeNeutralRateMin()
   },
   rsi: {
     // -- common
@@ -453,8 +433,9 @@ let strategies = {
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    neutral_rate: RangeNeutralRate(),
-    neutral_rate_min: RangeNeutralRateMin()
+    neutral_rate: RangeNeutralRateReverse(),
+    neutral_rate_min: RangeNeutralRateMin(),
+    reversed: Range(0, 1)
   },
   trust_distrust: {
     // -- common

@@ -64,13 +64,13 @@ let objectProduct = obj => {
 let runCommand = (strategy, cb) => {
   countArr.push(1);
   let strategyArgs = {
-    cci_srsi: `--cci_periods=${strategy.rsi_periods} --rsi_periods=${strategy.srsi_periods} --srsi_periods=${strategy.srsi_periods} --srsi_k=${strategy.srsi_k} --srsi_d=${strategy.srsi_d} --oversold_rsi=${strategy.oversold_rsi} --overbought_rsi=${strategy.overbought_rsi} --oversold_cci=${strategy.oversold_cci} --overbought_cci=${strategy.overbought_cci} --constant=${strategy.constant}`,
+    cci_srsi: `--cci_periods=${strategy.rsi_periods} --rsi_periods=${strategy.srsi_periods} --srsi_periods=${strategy.srsi_periods} --srsi_k=${strategy.srsi_k} --srsi_d=${strategy.srsi_d} --oversold_rsi=${strategy.oversold_rsi} --overbought_rsi=${strategy.overbought_rsi} --oversold_cci=${strategy.oversold_cci} --overbought_cci=${strategy.overbought_cci} --constant=${strategy.constant} --reversed=${strategy.reversed}`,
     srsi_macd: `--rsi_periods=${strategy.rsi_periods} --srsi_periods=${strategy.srsi_periods} --srsi_k=${strategy.srsi_k} --srsi_d=${strategy.srsi_d} --oversold_rsi=${strategy.oversold_rsi} --overbought_rsi=${strategy.overbought_rsi} --ema_short_period=${strategy.ema_short_period} --ema_long_period=${strategy.ema_long_period} --signal_period=${strategy.signal_period} --up_trend_threshold=${strategy.up_trend_threshold} --down_trend_threshold=${strategy.down_trend_threshold}`,
     macd: `--ema_short_period=${strategy.ema_short_period} --ema_long_period=${strategy.ema_long_period} --signal_period=${strategy.signal_period} --up_trend_threshold=${strategy.up_trend_threshold} --down_trend_threshold=${strategy.down_trend_threshold} --overbought_rsi_periods=${strategy.overbought_rsi_periods} --overbought_rsi=${strategy.overbought_rsi}`,
     rsi: `--rsi_periods=${strategy.rsi_periods} --oversold_rsi=${strategy.oversold_rsi} --overbought_rsi=${strategy.overbought_rsi} --rsi_recover=${strategy.rsi_recover} --rsi_drop=${strategy.rsi_drop} --rsi_divisor=${strategy.rsi_divisor}`,
     sar: `--sar_af=${strategy.sar_af} --sar_max_af=${strategy.sar_max_af}`,
     speed: `--baseline_periods=${strategy.baseline_periods} --trigger_factor=${strategy.trigger_factor}`,
-    trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate} --neutral_rate_min=${strategy.neutral_rate_min}`,
+    trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate} --neutral_rate_min=${strategy.neutral_rate_min} --reversed=${strategy.reversed}`,
     reverse_trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh'; // Use 'win32' for 64 bit windows too
@@ -207,7 +207,8 @@ let strategies = {
     overbought_rsi: [85],
     oversold_cci: [-90],
     overbought_cci: [140],
-    constant: [0.015]
+    constant: [0.015],
+    reversed: [0, 1]
   }),
   srsi_macd: objectProduct({
     period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
@@ -264,17 +265,9 @@ let strategies = {
     neutral_rate: ['auto', 'auto_trend'],
     neutral_rate_min: [0.0001, 0.001, 0.01, 0.1],
     oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 34, 45, 60],
-    oversold_rsi: [0, 5, 10, 15, 20, 30, 50]
+    oversold_rsi: [0, 5, 10, 15, 20, 30, 50],
+    reversed: [0, 1]
   }),
-  reverse_trend_ema: objectProduct({
-    period: ['1s', '3s', '6s', '12s'],
-    min_periods: [60],
-    trend_ema: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 34, 45, 60],
-    neutral_rate: ['auto_trend'],
-    neutral_rate_min: [0.0001, 0.001, 0.01, 0.1],
-    oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 34, 45, 60],
-    oversold_rsi: [0, 5, 10, 15, 20, 30, 50]
-  })
 };
 
 let args = process.argv;
@@ -318,8 +311,7 @@ parallel(tasks, PARALLEL_LIMIT, (err, results) => {
     rsi: filedsGeneral.concat(['rsiPeriods', 'oversoldRsi', 'overboughtRsi', 'rsiRecover', 'rsiDrop', 'rsiDivsor', 'params']),
     sar: filedsGeneral.concat(['sarAf', 'sarMaxAf', 'params']),
     speed: filedsGeneral.concat(['baselinePeriods', 'triggerFactor', 'params']),
-    trend_ema: filedsGeneral.concat(['trendEma', 'neutralRate', 'neutralRateMin', 'oversoldRsiPeriods', 'oversoldRsi', 'params']),
-    reverse_trend_ema: filedsGeneral.concat(['trendEma', 'neutralRate', 'oversoldRsiPeriods', 'oversoldRsi', 'params'])
+    trend_ema: filedsGeneral.concat(['trendEma', 'neutralRate', 'neutralRateMin', 'oversoldRsiPeriods', 'oversoldRsi', 'params'])
   };
   let fieldNames = {
     cci_srsi: filedNamesGeneral.concat(['CCI Periods', 'RSI Periods', 'SRSI Periods', 'SRSI K', 'SRSI D', 'Oversold RSI', 'Overbought RSI', 'Oversold CCI', 'Overbought CCI', 'Constant', 'Full Parameters']),
@@ -328,8 +320,7 @@ parallel(tasks, PARALLEL_LIMIT, (err, results) => {
     rsi: filedNamesGeneral.concat(['RSI Periods', 'Oversold RSI', 'Overbought RSI', 'RSI Recover', 'RSI Drop', 'RSI Divisor', 'Full Parameters']),
     sar: filedNamesGeneral.concat(['SAR AF', 'SAR MAX AF', 'Full Parameters']),
     speed: filedNamesGeneral.concat(['Baseline Periods', 'Trigger Factor', 'Full Parameters']),
-    trend_ema: filedNamesGeneral.concat(['Trend EMA', 'Neutral Rate', 'Neutral Rate Minimum', 'Oversold RSI Periods', 'Oversold RSI', 'Full Parameters']),
-    reverse_trend_ema: filedNamesGeneral.concat(['Trend EMA', 'Neutral Rate', 'Oversold RSI Periods', 'Oversold RSI', 'Full Parameters'])
+    trend_ema: filedNamesGeneral.concat(['Trend EMA', 'Neutral Rate', 'Neutral Rate Minimum', 'Oversold RSI Periods', 'Oversold RSI', 'Full Parameters'])
   };
   let csv = json2csv({
     data: results,
