@@ -20,7 +20,7 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_cci', 'buy when CCI reaches or drops below this value', Number, -90)
       this.option('overbought_cci', 'sell when CCI reaches or goes above this value', Number, 140)
       this.option('constant', 'constant', Number, 0.015)
-      this.option('reversed', 'act reversed on trend', Number, 0)
+      this.option('reversed', 'act reversed on trend and/or side market', String, 'none')
       console.log('If you have questions about this strategy, contact me... @talvasconcelos');
     },
 
@@ -54,13 +54,13 @@ module.exports = function container (get, set, clear) {
           // Buy signal
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
             if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = (s.options.reversed ? 'sell' : 'buy')
+              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'side' ? 'sell' : 'buy')
             }
           }
           // Sell signal
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = (s.options.reversed ? 'buy' : 'sell')
+              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'side' ? 'buy' : 'sell')
             }
           }
           //cb()
@@ -69,7 +69,7 @@ module.exports = function container (get, set, clear) {
         if (s.trend === 'up') {
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
             if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = (s.options.reversed ? 'sell' : 'buy')
+              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'trend' ? 'sell' : 'buy')
             }
           }
         }
@@ -77,7 +77,7 @@ module.exports = function container (get, set, clear) {
         if (s.trend === 'down') {
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = (s.options.reversed ? 'buy' : 'sell')
+              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'trend' ? 'buy' : 'sell')
             }
           }
         }

@@ -208,7 +208,7 @@ let strategies = {
     oversold_cci: [-90],
     overbought_cci: [140],
     constant: [0.015],
-    reversed: [0, 1]
+    reversed: ['none', 'both', 'side', 'trend']
   }),
   srsi_macd: objectProduct({
     period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
