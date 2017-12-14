@@ -279,14 +279,16 @@ let RangeItems = (items) => {
 let strategies = {
   crossover_vwap: {
     // -- common
-    period: RangePeriod(1, 200, 'm'),
+    selector: RangeItems(selectors),
+    period: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 200),
-    markup_pct: RangeFloat(0, 5),
-    order_type: RangeMakerTaker(),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeTaker(),
     sell_stop_pct: Range0(1, 50),
     buy_stop_pct: Range0(1, 50),
     profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1,20),
+    profit_stop_pct: Range(1, 20),
     
     // -- strategy
     emalen1: Range(1, 300),
