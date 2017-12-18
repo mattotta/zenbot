@@ -44,6 +44,8 @@ module.exports = function container (get, set, clear) {
       .option('--disable_stats', 'disable printing order stats')
       .option('--reset_profit', 'start new profit calculation from 0')
       .option('--debug', 'output detailed debug info')
+      .option('--markdown_bid_pct <pct>', '% to mark down bid price for simulated quote', Number, c.markdown_bid_pct)
+      .option('--markup_ask_pct <pct>', ' % to mark up ask price for simulated quote', Number, c.markup_ask_pct)
       .action(function (selector, cmd) {
         var raw_opts = minimist(process.argv)
         var s = {options: JSON.parse(JSON.stringify(raw_opts))}

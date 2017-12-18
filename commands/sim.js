@@ -39,6 +39,9 @@ module.exports = function container (get, set, clear) {
       .option('--disable_options', 'disable printing of options')
       .option('--enable_stats', 'enable printing order stats')
       .option('--verbose', 'print status lines on every period')
+      .option('--silent', 'don not print status lines at all')
+      .option('--markdown_bid_pct <pct>', '% to mark down bid price for simulated quote', Number, c.markdown_bid_pct)
+      .option('--markup_ask_pct <pct>', ' % to mark up ask price for simulated quote', Number, c.markup_ask_pct)
       .action(function (selector, cmd) {
         var s = {options: minimist(process.argv)}
         var so = s.options
@@ -50,8 +53,13 @@ module.exports = function container (get, set, clear) {
         })
         if (so.start) {
           so.start = moment(so.start, "YYYYMMDDhhmm").valueOf()
-          if (so.days && !so.end) {
-            so.end = tb(so.start).resize('1d').add(so.days).toMilliseconds()
+          if (!so.end) {
+            if (so.days) {
+              so.end = tb(so.start).resize('1d').add(so.days).toMilliseconds()
+            } else {
+              so.end = tb('1d').add(1).toMilliseconds()
+              so.days = Math.floor((so.end - so.start) / 86400000) + 1
+            }
           }
         }
         if (so.end) {
