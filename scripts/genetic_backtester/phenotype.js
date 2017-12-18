@@ -43,6 +43,13 @@ module.exports = {
         var items = [0, 0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007, 0.0008, 0.0009, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
         var index = Math.floor(Math.random() * items.length);
         r[k] = items[index];
+      } else if (v.type === 'neutral_rate_min_new') {
+        var items = [0, 0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007, 0.0008, 0.0009, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+        do  {
+          var index1 = Math.floor(Math.random() * items.length);
+          var index2 = Math.floor(Math.random() * items.length);
+        } while (index1 >= index2)
+        r[k] = [items[index1], items[index2]].sort().join(';');
       } else if (v.type === 'sigmoidtanhrelu') {
         var items = ['sigmoid', 'tanh', 'relu'];
         var index = Math.floor(Math.random() * items.length);
