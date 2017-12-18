@@ -58,6 +58,14 @@ module.exports = {
         var items = ['1s', '3s', '5s', '10s', '15s', '20s', '30s', '45s', '60s', '90s', '2m', '3m', '5m', '10m', '15m', '20m', '30m', '45s', '60m', '90m', '120m']
         var index = Math.floor(Math.random() * items.length);
         r[k] = items[index];
+      } else if (v.type === 'period_long') {
+        var items = ['1m', '2m', '3m', '5m', '10m', '15m', '20m', '30m', '45s', '60m', '90m', '120m']
+        var index = Math.floor(Math.random() * items.length);
+        r[k] = items[index];
+      } else if (v.type === 'period_short') {
+        var items = ['1s', '3s', '5s', '10s', '15s', '20s', '30s', '45s', '60s', '90s', '120s']
+        var index = Math.floor(Math.random() * items.length);
+        r[k] = items[index];
       } else if (v.type === 'items') {
         var index = Math.floor(Math.random() * v.items.length);
         r[k] = v.items[index];

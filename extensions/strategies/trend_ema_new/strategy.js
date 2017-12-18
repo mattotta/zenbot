@@ -12,6 +12,7 @@ module.exports = function container (get, set, clear) {
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
       this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float(s)', String)
+      this.option('decision', 'control decision mode', String, 'direct')
 
       // process neutral rate parameter
       if (typeof s.options.neutral_rate_min === 'string') {
@@ -72,7 +73,7 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
-      s.signal = s.strategy.getSignal(s)
+      s.signal = s.strategy.getSignal(s, true)
       cb()
     },
 
@@ -80,7 +81,7 @@ module.exports = function container (get, set, clear) {
       let cols = []
 
       if (typeof s.period.trend_ema_rate === 'number' && typeof s.period.trend_ema_stddev === 'number') {
-        let signal = s.strategy.getSignal(s)
+        let signal = s.strategy.getSignal(s, false)
         let color = 'grey'
         if (signal === 'buy') {
           color = 'green'
@@ -100,21 +101,94 @@ module.exports = function container (get, set, clear) {
       return cols
     },
 
-    getSignal: function (s) {
+    getSignal: function (s, remember) {
       let signal = null
 
       if (s.lookback[0]) {
         let trend1 = s.lookback[0].trend
         let trend2 = s.period.trend
 
-        if (trend2 === 'up_weak' || trend2 === 'up_strong') {
-          signal = 'buy'
-        } else if (trend2 === 'down_weak' || trend2 === 'down_strong') {
-          signal = 'sell'
-        } else if (trend1 === 'up_strong' && trend2 !== 'up_strong' && trend2 !== 'up_weak') {
-          signal = 'sell'
-        } else if (trend1 === 'down_strong' && trend2 !== 'down_strong' && trend2 !== 'down_weak') {
-          signal = 'buy'
+        if (s.options.decision === 'direct') {
+          if (trend2 === 'up_strong' || trend2 === 'down_weak') {
+            signal = 'sell'
+          } else if (trend2 === 'down_strong' || trend2 === 'up_weak') {
+            signal = 'buy'
+          }
+
+        } else if (s.options.decision === 'direct-remember') {
+          if (trend2 === 'up_strong') {
+            if (remember) {
+              s.sold_after_drop = true
+              s.bought_after_rise = false
+            }
+            signal = 'sell'
+          } else if (trend2 === 'down_strong') {
+            if (remember) {
+              s.bought_after_rise = true
+              s.sold_after_drop = false
+            }
+            signal = 'buy'
+          } else if (trend2 === 'up_weak' && !s.sold_after_drop) {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+            signal = 'buy'
+          }else if (trend2 === 'down_weak' && !s.bought_after_rise) {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+            signal = 'buy'
+          } else if (trend2 === null) {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+          }
+
+        } else if (s.options.decision === 'after') {
+          if (trend1 === 'up_strong' && trend2 !== 'up_strong') {
+            signal = 'sell'
+          } else if (trend1 === 'down_strong' && trend2 !== 'down_strong') {
+            signal = 'buy'
+          } else if (trend2 === 'up_weak' || trend2 === 'up_strong') {
+            signal = 'buy'
+          } else if (trend2 === 'down_weak' || trend2 === 'down_strong') {
+            signal = 'sell'
+          }
+
+        } else if (s.options.decision === 'after-remember') {
+          if (trend1 === 'up_strong' && trend2 !== 'up_strong') {
+            if (remember) {
+              s.sold_after_drop = true
+              s.bought_after_rise = false
+            }
+            signal = 'sell'
+          } else if (trend1 === 'down_strong' && trend2 !== 'down_strong') {
+            if (remember) {
+              s.bought_after_rise = true
+              s.sold_after_drop = false
+            }
+            signal = 'buy'
+          } else if ((trend2 === 'up_weak' && !s.sold_after_drop) || trend2 === 'up_strong') {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+            signal = 'buy'
+          } else if ((trend2 === 'down_weak' && !s.bought_after_rise) || trend2 === 'down_strong') {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+            signal = 'sell'
+          } else if (trend2 === null) {
+            if (remember) {
+              s.bought_after_rise = false
+              s.sold_after_drop = false
+            }
+          }
         }
       }
 
