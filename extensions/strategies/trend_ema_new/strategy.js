@@ -14,7 +14,7 @@ module.exports = function container (get, set, clear) {
       this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float(s)', String)
 
       // process neutral rate parameter
-      s.options.neutral_rate_min = s.options.neutral_rate_min.split(';').sort()
+      s.options.neutral_rate_min = s.options.neutral_rate_min.split(',').sort()
     },
 
     calculate: function (s) {

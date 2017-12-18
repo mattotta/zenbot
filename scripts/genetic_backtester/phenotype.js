@@ -49,7 +49,7 @@ module.exports = {
           var index1 = Math.floor(Math.random() * items.length);
           var index2 = Math.floor(Math.random() * items.length);
         } while (index1 >= index2)
-        r[k] = [items[index1], items[index2]].sort().join(';');
+        r[k] = [items[index1], items[index2]].sort().join(',');
       } else if (v.type === 'sigmoidtanhrelu') {
         var items = ['sigmoid', 'tanh', 'relu'];
         var index = Math.floor(Math.random() * items.length);
