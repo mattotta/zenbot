@@ -132,7 +132,7 @@ module.exports = function container (get, set, clear) {
           output_lines.push('vs. buy hold: ' + n(s.balance.currency).subtract(buy_hold).divide(buy_hold).format('0.00%').yellow)
           output_lines.push(s.my_trades.length + ' trades over ' + s.day_count + ' days (avg ' + n(s.my_trades.length / s.day_count).format('0.00') + ' trades/day)')
           var last_buy
-          var losses = 0, sells = 0
+          var losses = 0, sells = 0, fees = 0
           s.my_trades.forEach(function (trade) {
             if (trade.type === 'buy') {
               last_buy = trade.price
@@ -143,11 +143,15 @@ module.exports = function container (get, set, clear) {
               }
               sells++
             }
+            if (trade.fee) {
+              fees = fees + trade.fee
+            }
           })
           if (s.my_trades.length) {
             output_lines.push('win/loss: ' + (sells - losses) + '/' + losses)
             output_lines.push('error rate: ' + (sells ? n(losses).divide(sells).format('0.00%') : '0.00%').yellow)
           }
+          output_lines.push('fees: ' + n(fees).format('0.00000000').yellow)
           output_lines.forEach(function (line) {
             console.log(line)
           })
