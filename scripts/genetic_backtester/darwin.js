@@ -313,7 +313,7 @@ let strategies = {
     emalen1: Range(1, 300),
     smalen1: Range(1, 300),
     smalen2: Range(1, 300),
-    vwap_length: Range(1, 200),
+    vwap_length: Range(1, 300),
     vwap_max: RangeFactor(0, 10000, 10)//0 disables this max cap. Test in increments of 10
   },
   cci_srsi: {
