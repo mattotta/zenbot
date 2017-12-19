@@ -507,6 +507,8 @@ let strategies = {
     neutral_rate: RangeNeutralRateReverse(),
     neutral_rate_min: RangeNeutralRateMinNew(),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
+    order_type_weak: RangeMakerTaker(),
+    order_type_strong: RangeTaker()
   },
   trust_distrust: {
     // -- common
