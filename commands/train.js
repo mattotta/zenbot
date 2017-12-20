@@ -85,7 +85,7 @@ module.exports = function container (get, set, clear) {
           }
         })
 
-        so.periodSize = so.period;
+        so.periodLength = so.period;
         
         if (!so.days_test) { so.days_test = 0 }
         so.strategy = 'noop'
@@ -135,13 +135,13 @@ module.exports = function container (get, set, clear) {
 
         if (!so.min_periods) so.min_periods = 1
         var cursor, reversing, reverse_point
-        var query_start = so.start_training ? tb(so.start_training).resize(so.periodSize).subtract(so.min_periods + 2).toMilliseconds() : null
+        var query_start = so.start_training ? tb(so.start_training).resize(so.periodLength).subtract(so.min_periods + 2).toMilliseconds() : null
         
         function writeTempModel (strategy) {
           var tempModelString = JSON.stringify(
             {
               "selector": so.selector,
-              "period": so.periodSize,
+              "period": so.periodLength,
               "start_training": moment(so.start_training),
               "end_training": moment(so.end_training),
               "options": fa_getTrainOptions(so),
@@ -163,7 +163,7 @@ module.exports = function container (get, set, clear) {
           var finalModelString = JSON.stringify(
             {
               "selector": so.selector,
-              "period": so.periodSize,
+              "period": so.periodLength,
               "start_training": moment(so.start_training).utc(),
               "end_training": moment(end_training).utc(),
               "result_training": trainingResult,
@@ -176,7 +176,7 @@ module.exports = function container (get, set, clear) {
           var testVsBuyHold = typeof(testResult) !== "undefined" ? testResult.vsBuyHold : 'noTest'
 
           var finalModelFile = 'models/forex.model_' + so.selector
-            + '_period=' + so.periodSize
+            + '_period=' + so.periodLength
             + '_from=' + moment(so.start_training).utc().format('YYYYMMDD_HHmmssZZ')
             + '_to=' + moment(end_training).utc().format('YYYYMMDD_HHmmssZZ')
             + '_trainingVsBuyHold=' + trainingResult.vsBuyHold
@@ -238,7 +238,7 @@ module.exports = function container (get, set, clear) {
             '--modelfile', path.resolve(__dirname, '..', tempModelFile),
             '--start', so.start_training,
             '--end', so.end_training,
-            '--period', so.periodSize,
+            '--period', so.periodLength,
             '--filename', path.resolve(__dirname, '..', tempModelFile) + '-simTrainingResult.html'
           ]
           var trainingSimulation = spawn(path.resolve(__dirname, '..', zenbot_cmd), trainingArgs, { stdio: 'inherit' })
@@ -264,7 +264,7 @@ module.exports = function container (get, set, clear) {
                 '--disable_options',
                 '--modelfile', path.resolve(__dirname, '..', tempModelFile),
                 '--start', so.end_training,
-                '--period', so.periodSize,
+                '--period', so.periodLength,
                 '--filename', path.resolve(__dirname, '..', tempModelFile) + '-simTestResult.html',
               ]
               var testSimulation = spawn(path.resolve(__dirname, '..', zenbot_cmd), testArgs, { stdio: 'inherit' })
