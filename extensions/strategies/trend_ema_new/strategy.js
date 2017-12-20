@@ -7,7 +7,8 @@ module.exports = function container (get, set, clear) {
     description: 'Buy when (EMA - last(EMA) > 0) and sell when (EMA - last(EMA) < 0). Optional buy on low RSI.',
 
     getOptions: function (s) {
-      this.option('period', 'period length', String, '2m')
+      this.option('period', 'period length, same as --periodLength', String, '2m')
+      this.option('periodLength', 'period length, same as --period', String, '2m')
       this.option('min_periods', 'min. number of history periods', Number, 52)
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
@@ -100,11 +101,27 @@ module.exports = function container (get, set, clear) {
         }
         cols.push(z(8, n(s.period.trend_ema_rate).format('0.0000'), ' ')[color])
         cols.push(z(8, n(s.period.trend_ema_stddev).format('0.0000'), ' ').grey)
+        let sign = '  |  '
+        color = 'grey'
+        if (s.period.trend === 'down_strong') {
+          sign = '<<|  '
+          color = 'red'
+        } else if (s.period.trend === 'down_weak') {
+          sign = ' <|  '
+          color = 'red'
+        } else if (s.period.trend === 'up_weak') {
+          sign = '  |> '
+          color = 'green'
+        } else if (s.period.trend === 'up_strong') {
+          sign = '  |>>'
+          color = 'green'
+        }
+        cols.push(z(7, sign, ' ')[color])
       } else {
-        if (s.period.trend_ema_stddev) {
-          cols.push('                  ')
+        if (!s.period.trend_ema_stddev) {
+          cols.push('                         ')
         } else {
-          cols.push('         ')
+          cols.push('                ')
         }
       }
 
@@ -158,7 +175,7 @@ module.exports = function container (get, set, clear) {
               s.bought_after_rise = false
               s.sold_after_drop = false
             }
-            signal = 'buy'
+            signal = 'sell'
             type = 'weak'
           } else if (trend2 === null) {
             if (remember) {
