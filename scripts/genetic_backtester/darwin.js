@@ -319,7 +319,7 @@ let strategies = {
     emalen1: Range(1, 300),
     vwap_length: Range(1, 300),
     vwap_max: RangeFactor(0, 100000, 10), // 0 disables this max cap. Test in increments of 10
-    min_diff: RangeFloat(0, 5),
+    min_diff_pct: RangeFloat(0, 1),
   },
   cci_srsi: {
     // -- common
