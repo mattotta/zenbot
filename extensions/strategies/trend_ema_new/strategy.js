@@ -28,7 +28,7 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
-      get('lib.ema')(s, 'trend_ema', s.options.trend_ema, s.options.ema_source)
+      get('lib.ema')(s, 'trend_ema', s.options.trend_ema)
       if (s.period.trend_ema && s.lookback[0] && s.lookback[0].trend_ema) {
         s.period.trend_ema_rate = (s.period.trend_ema - s.lookback[0].trend_ema) / s.lookback[0].trend_ema * 100
       }

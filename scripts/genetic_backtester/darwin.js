@@ -309,12 +309,12 @@ let strategies = {
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
-    order_type: RangeTaker(),
-    sell_stop_pct: Range0(1, 50),
-    buy_stop_pct: Range0(1, 50),
-    profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1, 20),
-    
+    order_type: RangeMakerTaker(),
+    sell_stop_pct: Range(0, 0),
+    buy_stop_pct: Range(0, 0),
+    profit_stop_enable_pct: Range(0, 0),
+    profit_stop_pct: Range(0, 0),
+
     // -- strategy
     emalen1: Range(1, 300),
     vwap_length: Range(1, 300),
@@ -480,15 +480,15 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeTaker(),
-    sell_stop_pct: Range0(1, 50),
-    buy_stop_pct: Range0(1, 50),
-    profit_stop_enable_pct: Range0(1, 20),
-    profit_stop_pct: Range(1, 20),
+    sell_stop_pct: Range(0, 0),
+    buy_stop_pct: Range(0, 0),
+    profit_stop_enable_pct: Range(0, 0),
+    profit_stop_pct: Range(0, 0),
 
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
-    oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
-    oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
+    oversold_rsi_periods: Range(0, 0),
+    oversold_rsi: Range(0, 0),
     neutral_rate: RangeNeutralRateReverse(),
     neutral_rate_min: RangeNeutralRateMin(),
     reversed: Range(0, 1)
