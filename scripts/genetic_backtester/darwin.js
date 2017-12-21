@@ -112,6 +112,7 @@ let processOutput = output => {
   let vsBuyHoldRegexp = /vs. buy hold: (-?\d+\.\d+)%/g;
   let wlRegexp = /win\/loss: (\d+)\/(\d+)/g;
   let errRegexp = /error rate: (.*)%/g;
+  let feeRegexp = /fees: (\d+\.\d+)/g;
 
   let strippedOutput = StripAnsi(output);
   let output2 = strippedOutput.substr(strippedOutput.length - 3500);
@@ -123,9 +124,11 @@ let processOutput = output => {
   let vsBuyHold = vsBuyHoldRegexp.exec(output2)[1];
   let wlMatch = wlRegexp.exec(output2);
   let errMatch      = errRegexp.exec(output2);
+  let feeMatch      = feeRegexp.exec(output2);
   let wins          = wlMatch !== null ? parseInt(wlMatch[1]) : 0;
   let losses        = wlMatch !== null ? parseInt(wlMatch[2]) : 0;
   let errorRate     = errMatch !== null ? parseInt(errMatch[1]) : 0;
+  let fees          = feeMatch !== null ? feeMatch[1] : 0;
   let days = parseInt(params.days);
 
   let roi = roundp(
@@ -156,6 +159,7 @@ let processOutput = output => {
     endBalance: parseFloat(endBalance),
     buyHold: parseFloat(buyHold),
     vsBuyHold: parseFloat(vsBuyHold),
+    fees: fees,
     wins: wins,
     losses: losses,
     errorRate: parseFloat(errorRate),
@@ -750,8 +754,8 @@ let simulateGeneration = () => {
 
     results.sort((a, b) => (a.fitness < b.fitness) ? 1 : ((b.fitness < a.fitness) ? -1 : 0));
 
-    let fieldsGeneral = ['selector', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days', 'params'];
-    let fieldNamesGeneral = ['Selector', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days', 'Full Parameters'];
+    let fieldsGeneral = ['selector', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'fees', 'wins', 'losses', 'period', 'min_periods', 'days', 'params'];
+    let fieldNamesGeneral = ['Selector', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', 'Fees ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days', 'Full Parameters'];
 
     let csv = json2csv({
       data: results,
