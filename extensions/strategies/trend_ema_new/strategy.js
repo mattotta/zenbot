@@ -12,15 +12,11 @@ module.exports = function container (get, set, clear) {
       this.option('min_periods', 'min. number of history periods', Number, 52)
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
-      this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float(s) (separated by comma)', String)
+      this.option('neutral_rate_min_weak', 'avoid trades if neutral_rate under this float for weak signal', String)
+      this.option('neutral_rate_min_strong', 'avoid trades if neutral_rate under this float for strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
-      this.option('order_type_weak', 'order type for orders based on weak decisions', String)
-      this.option('order_type_strong', 'order type for orders based on strong decisions', String)
-
-      // process neutral rate parameter
-      if (typeof s.options.neutral_rate_min === 'string') {
-        s.options.neutral_rate_min = s.options.neutral_rate_min.split(',').sort()
-      }
+      this.option('order_type_weak', 'order type for orders based on weak signal', String)
+      this.option('order_type_strong', 'order type for orders based on strong signal', String)
 
       // get order type
       if (!s.options.order_type_weak) {
@@ -63,8 +59,8 @@ module.exports = function container (get, set, clear) {
 
       if (typeof s.period.trend_ema_stddev === 'number') {
 
-        let ema_weak = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min[0])
-        let ema_strong = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min[s.options.neutral_rate_min.length - 1])
+        let ema_weak = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min_weak)
+        let ema_strong = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min_strong)
 
         if (s.period.trend_ema_rate > ema_weak) {
           if (s.period.trend_ema_rate > ema_strong) {

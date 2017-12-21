@@ -54,7 +54,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     sar: `--sar_af=${phenotype.sar_af} --sar_max_af=${phenotype.sar_max_af}`,
     speed: `--baseline_periods=${phenotype.baseline_periods} --trigger_factor=${phenotype.trigger_factor}`,
     trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
-    trend_ema_new: `--trend_ema=${phenotype.trend_ema} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --decision=${phenotype.decision} --order_type_weak=${phenotype.order_type_weak} --order_type_strong=${phenotype.order_type_strong}`,
+    trend_ema_new: `--trend_ema=${phenotype.trend_ema} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min_weak=${phenotype.neutral_rate_min_weak} --neutral_rate_min_strong=${phenotype.neutral_rate_min_strong} --decision=${phenotype.decision} --order_type_weak=${phenotype.order_type_weak} --order_type_strong=${phenotype.order_type_strong}`,
     trust_distrust: `--sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
     ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
@@ -280,9 +280,15 @@ let RangeNeutralRateMin = () => {
   return r;
 };
 
-let RangeNeutralRateMinNew = () => {
+let RangeNeutralRateMinWeak = () => {
   var r = {
-    type: 'neutral_rate_min_new'
+    type: 'neutral_rate_min_weak'
+  };
+  return r;
+};
+let RangeNeutralRateMinStrong = () => {
+  var r = {
+    type: 'neutral_rate_min_strong'
   };
   return r;
 };
@@ -311,10 +317,8 @@ let strategies = {
     
     // -- strategy
     emalen1: Range(1, 300),
-    smalen1: Range(1, 300),
-    smalen2: Range(1, 300),
     vwap_length: Range(1, 300),
-    vwap_max: RangeFactor(0, 10000, 10)//0 disables this max cap. Test in increments of 10
+    vwap_max: RangeFactor(0, 100000, 10)//0 disables this max cap. Test in increments of 10
   },
   cci_srsi: {
     // -- common
@@ -505,7 +509,8 @@ let strategies = {
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     neutral_rate: RangeNeutralRateReverse(),
-    neutral_rate_min: RangeNeutralRateMinNew(),
+    neutral_rate_min_weak: RangeNeutralRateMinWeak(),
+    neutral_rate_min_strong: RangeNeutralRateMinStrong(),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
     order_type_weak: RangeMaker(),
     order_type_strong: RangeTaker()
