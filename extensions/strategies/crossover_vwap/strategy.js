@@ -21,6 +21,7 @@ module.exports = function container (get, set, clear) {
       this.option('smalen2', 'Length of SMA 2', Number, 60 )//purple
       this.option('vwap_length', 'Min periods for vwap to start', Number, 10 )//gold
       this.option('vwap_max', 'Max history for vwap. Increasing this makes it more sensitive to short-term changes', Number, 8000)//gold
+      this.option('min_diff', 'Minimal difference to trigger a signal', Number, 0)
     },
 
 
@@ -37,7 +38,7 @@ module.exports = function container (get, set, clear) {
         vwapgold = s.period.vwap
 
       // helper functions
-      var trendUp = function(s, cancel){
+      let trendUp = function(s, cancel){
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -56,9 +57,12 @@ module.exports = function container (get, set, clear) {
           s.signal = !s.acted_on_trend ? 'sell' : null
         };
 
-      if (emagreen && vwapgold) {
-        if(vwapgold > emagreen) trendUp(s, true)
+      if (emagreen && vwapgold && Math.abs(emagreen - vwapgold) > s.options.min_diff) {
+        if (vwapgold > emagreen) trendUp(s, true)
         else trendDown(s)
+      } else {
+        s.trend = null
+        s.signal = null
       }
       cb()
     },
@@ -69,8 +73,11 @@ module.exports = function container (get, set, clear) {
         vwapgold = s.period.vwap
 
       if (vwapgold && emagreen) {
-        let color = 'green'
-        if(vwapgold > emagreen) color = 'red'
+        let color = 'grey'
+        if (Math.abs(emagreen - vwapgold) > s.options.min_diff) {
+          if (vwapgold > emagreen) color = 'red'
+          else color = 'green'
+        }
 
         cols.push(z(6, n(vwapgold).format('0.00000'), '')['yellow'] + ' ')
         cols.push(z(6, n(emagreen).format('0.00000'), '')[color] + ' ')
