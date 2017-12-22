@@ -187,7 +187,7 @@ let processOutput = (output, command) => {
     oversoldRsi:        params.oversold_rsi,
 
     days:               days,
-    period:             params.period,
+    period:             params.periodLength,
     min_periods:        params.min_periods,
     roi:                roi,
     wlRatio:            losses > 0 ? roundp(wins / losses, 3) : 'Infinity',

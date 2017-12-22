@@ -43,7 +43,7 @@ let selector = (argv.selector) ? argv.selector : 'gdax.BTC-EUR';
 let selectors = selector.split(',')
 
 let runCommand = (taskStrategyName, phenotype, cb) => {
-  let commonArgs = `--strategy=${taskStrategyName} --period=${phenotype.period} --min_periods=${phenotype.min_periods} --markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
+  let commonArgs = `--strategy=${taskStrategyName} --periodLength=${phenotype.periodLength} --min_periods=${phenotype.min_periods} --markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
   let strategyArgs = {
     crossover_vwap: `--emalen1=${phenotype.emalen1} --vwap_length=${phenotype.vwap_length} --vwap_max=${phenotype.vwap_max} --min_diff_pct=${phenotype.min_diff_pct}`,
     cci_srsi: `--cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant} --reversed=${phenotype.reversed} --ema_acc=${phenotype.ema_acc}`,
@@ -54,7 +54,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     sar: `--sar_af=${phenotype.sar_af} --sar_max_af=${phenotype.sar_max_af}`,
     speed: `--baseline_periods=${phenotype.baseline_periods} --trigger_factor=${phenotype.trigger_factor}`,
     trend_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
-    trend_ema_new: `--trend_ema=${phenotype.trend_ema} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min_weak=${phenotype.neutral_rate_min_weak} --neutral_rate_min_strong=${phenotype.neutral_rate_min_strong} --decision=${phenotype.decision} --order_type_weak=${phenotype.order_type_weak} --order_type_strong=${phenotype.order_type_strong}`,
+    trend_ema_new: `--trend_ema=${phenotype.trend_ema} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min_1=${phenotype.neutral_rate_min_1} --neutral_rate_min_2=${phenotype.neutral_rate_min_2} --decision=${phenotype.decision} --order_type_weak=${phenotype.order_type_weak} --order_type_strong=${phenotype.order_type_strong}`,
     trust_distrust: `--sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
     ta_ema: `--trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
@@ -164,7 +164,7 @@ let processOutput = output => {
     losses: losses,
     errorRate: parseFloat(errorRate),
     days: days,
-    period: params.period,
+    periodLength: params.periodLength,
     min_periods: params.min_periods,
     markup_pct: params.markup_pct,
     order_type: params.order_type,
@@ -296,7 +296,7 @@ let strategies = {
   crossover_vwap: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -315,7 +315,7 @@ let strategies = {
   cci_srsi: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -342,7 +342,7 @@ let strategies = {
   srsi_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -368,7 +368,7 @@ let strategies = {
   macd: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -390,7 +390,7 @@ let strategies = {
   neural: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -412,7 +412,7 @@ let strategies = {
   rsi: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -433,7 +433,7 @@ let strategies = {
   sar: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(2, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -450,7 +450,7 @@ let strategies = {
   speed: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -467,7 +467,7 @@ let strategies = {
   trend_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -488,7 +488,7 @@ let strategies = {
   trend_ema_new: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriodShort(),
+    periodLength: RangePeriodShort(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -510,7 +510,7 @@ let strategies = {
   trust_distrust: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -531,7 +531,7 @@ let strategies = {
   ta_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -554,7 +554,7 @@ let strategies = {
   ta_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -574,7 +574,7 @@ let strategies = {
   ts_crossover: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(),
+    periodLength: RangePeriod(),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -593,7 +593,7 @@ let strategies = {
   ts_crossover2: {
     // -- common
     selector: RangeItems(selectors),
-    period: RangePeriod(1, 120, ['s', 'm']),
+    periodLength: RangePeriod(1, 120, ['s', 'm']),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
