@@ -284,19 +284,6 @@ let RangeNeutralRateMin = () => {
   return r;
 };
 
-let RangeNeutralRateMinWeak = () => {
-  var r = {
-    type: 'neutral_rate_min_weak'
-  };
-  return r;
-};
-let RangeNeutralRateMinStrong = () => {
-  var r = {
-    type: 'neutral_rate_min_strong'
-  };
-  return r;
-};
-
 let RangeItems = (items) => {
   var r = {
     type: 'items',
@@ -514,10 +501,10 @@ let strategies = {
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     neutral_rate: RangeNeutralRateReverse(),
-    neutral_rate_min_weak: RangeNeutralRateMinWeak(),
-    neutral_rate_min_strong: RangeNeutralRateMinStrong(),
+    neutral_rate_min_1: RangeNeutralRateMin(),
+    neutral_rate_min_2: RangeNeutralRateMin(),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
-    order_type_weak: RangeMaker(),
+    order_type_weak: RangeMakerTaker(),
     order_type_strong: RangeTaker()
   },
   trust_distrust: {

@@ -11,12 +11,21 @@ module.exports = function container (get, set, clear) {
       this.option('periodLength', 'period length, same as --period', String, '2m')
       this.option('min_periods', 'min. number of history periods', Number, 52)
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
-      this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
-      this.option('neutral_rate_min_weak', 'avoid trades if neutral_rate under this float for weak signal', String)
-      this.option('neutral_rate_min_strong', 'avoid trades if neutral_rate under this float for strong signal', String)
+      this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
+      this.option('neutral_rate_min_1', 'avoid trades if neutral_rate under this float', Number, 0)
+      this.option('neutral_rate_min_2', 'avoid trades if neutral_rate under this float', Number, 0)
       this.option('decision', 'control decision mode', String, 'direct')
       this.option('order_type_weak', 'order type for orders based on weak signal', String)
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
+
+      // process neutral rate parameter
+      if (s.options.neutral_rate_min_1 > s.options.neutral_rate_min_2) {
+        s.options.neutral_rate_min_weak = s.options.neutral_rate_min_2
+        s.options.neutral_rate_min_strong = s.options.neutral_rate_min_1
+      } else {
+        s.options.neutral_rate_min_weak = s.options.neutral_rate_min_1
+        s.options.neutral_rate_min_strong = s.options.neutral_rate_min_2
+      }
 
       // get order type
       if (!s.options.order_type_weak) {
@@ -62,15 +71,15 @@ module.exports = function container (get, set, clear) {
         let ema_weak = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min_weak)
         let ema_strong = Math.max(s.period.trend_ema_stddev, s.options.neutral_rate_min_strong)
 
-        if (s.period.trend_ema_rate > ema_weak) {
-          if (s.period.trend_ema_rate > ema_strong) {
+        if (s.period.trend_ema_rate >= ema_weak) {
+          if (s.period.trend_ema_rate >= ema_strong) {
             s.period.trend = 'up_strong'
           } else {
             s.period.trend = 'up_weak'
           }
         }
-        else if (s.period.trend_ema_rate < (ema_weak * -1)) {
-          if (s.period.trend_ema_rate < (ema_strong * -1)) {
+        else if (s.period.trend_ema_rate <= (ema_weak * -1)) {
+          if (s.period.trend_ema_rate <= (ema_strong * -1)) {
             s.period.trend = 'down_strong'
           } else {
             s.period.trend = 'down_weak'
