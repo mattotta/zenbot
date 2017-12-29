@@ -175,7 +175,7 @@ let processOutput = output => {
 };
 
 let Range = (min, max) => {
-  var r = {
+  let r = {
     type: 'int',
     min: min,
     max: max
@@ -184,7 +184,7 @@ let Range = (min, max) => {
 };
 
 let Range0 = (min, max) => {
-  var r = {
+  let r = {
     type: 'int0',
     min: min,
     max: max
@@ -193,7 +193,7 @@ let Range0 = (min, max) => {
 };
 
 let RangeFactor = (min, max, factor) => {
-  var r = {
+  let r = {
     type: 'intfactor',
     min: min,
     max: max,
@@ -202,9 +202,8 @@ let RangeFactor = (min, max, factor) => {
   return r;
 };
 
-
 let RangeFloat = (min, max) => {
-  var r = {
+  let r = {
     type: 'float',
     min: min,
     max: max
@@ -212,78 +211,39 @@ let RangeFloat = (min, max) => {
   return r;
 };
 
-let RangePeriod = () => {
-  var r = {
-    type: 'period'
-  };
-  return r;
-};
-
-let RangePeriodLong = () => {
-  var r = {
-    type: 'period_long'
-  };
-  return r;
-};
-
-let RangePeriodShort = () => {
-  var r = {
-    type: 'period_short'
+let RangePeriod = (min, max, period) => {
+  let r = {
+    type: 'period',
+    min: min,
+    max: max,
+    period: period
   };
   return r;
 };
 
 let RangeMakerTaker = () => {
-  var r = {
+  let r = {
     type: 'makertaker'
   };
   return r;
 };
 
 let RangeMaker = () => {
-  var r = {
+  let r = {
     type: 'maker'
   };
   return r;
 };
 
 let RangeTaker = () => {
-  var r = {
+  let r = {
     type: 'taker'
   };
   return r;
 };
 
-let RangeNeuralActivation = () => {
-  var r = {
-    type: 'sigmoidtanhrelu'
-  };
-  return r;
-};
-
-let RangeNeutralRate = () => {
-  var r = {
-    type: 'neutral_rate'
-  };
-  return r;
-};
-
-let RangeNeutralRateReverse = () => {
-  var r = {
-    type: 'neutral_rate_reverse'
-  };
-  return r;
-};
-
-let RangeNeutralRateMin = () => {
-  var r = {
-    type: 'neutral_rate_min'
-  };
-  return r;
-};
-
 let RangeItems = (items) => {
-  var r = {
+  let r = {
     type: 'items',
     items: items
   };
@@ -294,7 +254,7 @@ let strategies = {
   crossover_vwap: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -313,7 +273,7 @@ let strategies = {
   cci_srsi: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -340,7 +300,7 @@ let strategies = {
   srsi_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -366,7 +326,7 @@ let strategies = {
   macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -388,7 +348,7 @@ let strategies = {
   neural: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -400,7 +360,7 @@ let strategies = {
 
     // -- strategy
     neurons_1: Range(1, 200),
-    activation_1_type: RangeNeuralActivation(),
+    activation_1_type: RangeItems(['sigmoid', 'tanh', 'relu']),
     depth: Range(1, 100),
     min_predict: Range(1, 100),
     momentum: Range(0, 100),
@@ -410,7 +370,7 @@ let strategies = {
   rsi: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -431,7 +391,7 @@ let strategies = {
   sar: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(2, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -448,7 +408,7 @@ let strategies = {
   speed: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -465,7 +425,7 @@ let strategies = {
   trend_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -479,14 +439,14 @@ let strategies = {
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     oversold_rsi_periods: Range(0, 0),
     oversold_rsi: Range(0, 0),
-    neutral_rate: RangeNeutralRateReverse(),
+    neutral_rate: RangeItems(['auto', 'auto_trend', 'auto_new']),
     neutral_rate_min: RangeFloat(0, 1),
     reversed: Range(0, 1)
   },
   trend_ema_new: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriodShort(),
+    period_length: RangePeriod(1, 120, 's'),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeTaker(),
@@ -497,7 +457,7 @@ let strategies = {
 
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
-    neutral_rate: RangeNeutralRateReverse(),
+    neutral_rate: RangeItems(['auto', 'auto_trend', 'auto_new']),
     neutral_rate_min_1: RangeFloat(0, 1),
     neutral_rate_min_2: RangeFloat(0, 1),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
@@ -507,7 +467,7 @@ let strategies = {
   trust_distrust: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -528,7 +488,7 @@ let strategies = {
   ta_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -551,7 +511,7 @@ let strategies = {
   ta_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -565,13 +525,13 @@ let strategies = {
     trend_ema: Range(2, TREND_EMA_MAX),
     oversold_rsi_periods: Range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    neutral_rate: RangeNeutralRate(),
+    neutral_rate: RangeItems(['auto', 'auto_trend']),
     neutral_rate_min: RangeFloat(0, 1)
   },
   ts_crossover: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -590,7 +550,7 @@ let strategies = {
   ts_crossover2: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, ['s', 'm']),
+    period_length: RangePeriod(1, 120, 'm'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -609,7 +569,7 @@ let strategies = {
 
 let allStrategyNames = () => {
   let r = [];
-  for (var k in strategies) {
+  for (let k in strategies) {
     r.push(k);
   }
   return r;
@@ -679,7 +639,7 @@ selectedStrategies.forEach(function(v) {
 
   let evolve = true;
   let population = (importedPoolData && importedPoolData[v]) ? importedPoolData[v] : [];
-  for (var i = population.length; i < populationSize; ++i) {
+  for (let i = population.length; i < populationSize; ++i) {
     population.push(Phenotypes.create(strategies[v]));
     evolve = false;
   }
