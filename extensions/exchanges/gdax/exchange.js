@@ -204,6 +204,7 @@ module.exports = function container (get, set, clear) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getBalance', func_args, err)
         var balance = {asset: 0, currency: 0}
+        var split = 1
         body.forEach(function (account) {
           if (account.currency === opts.currency) {
             balance.currency = account.balance
@@ -213,7 +214,16 @@ module.exports = function container (get, set, clear) {
             balance.asset = account.balance
             balance.asset_hold = account.hold
           }
+          else if (c.gdax.balance.split && c.gdax.balance.assets[account.currency] && c.gdax.balance.assets[account.currency] > account.balance) {
+            split++
+          }
         })
+        if (c.gdax.balance.split && c.gdax.balance.assets[opts.asset] && c.gdax.balance.assets[opts.asset] < balance.asset) {
+          balance.currency = 0
+        }
+        else {
+          balance.currency = balance.currency /split
+        }
         cb(null, balance)
       })
     },

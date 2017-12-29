@@ -25,6 +25,9 @@ c.gdax.passphrase = 'YOUR-PASSPHRASE'
 c.gdax.websocket = {}
 c.gdax.websocket.enabled = true
 c.gdax.websocket.trade_history = 1000
+c.gdax.balance = {}
+c.gdax.balance.split = false
+c.gdax.balance.assets = {}
 
 // to enable Poloniex trading, enter your API credentials:
 c.poloniex = {}
