@@ -90,11 +90,10 @@ module.exports = function container (get, set, clear) {
 
     onPeriod: function (s, cb) {
       let signal = s.strategy.getSignal(s, true)
-      if (signal && s.my_trades.length) {
-        if (s.my_trades[s.my_trades.length - 1].type === signal) {
-          // avoid same action like last trade
-          signal = null
-        }
+
+      if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
+        // avoid multiple buy signals
+        signal = null
       }
         
       s.signal = signal
