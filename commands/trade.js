@@ -366,7 +366,7 @@ module.exports = function container (get, set, clear) {
                   console.log('!!! Paper mode enabled. No real trades are performed until you remove --paper from the startup command.')
                 }
                 console.log('Press ' + ' l '.inverse + ' to list available commands.')
-                engine.syncBalance(false, function (err) {
+                engine.syncBalance(true, function (err) {
                   if (err) {
                     if (err.desc) console.error(err.desc)
                     if (err.body) console.error(err.body)
@@ -473,7 +473,7 @@ module.exports = function container (get, set, clear) {
           }
           function saveSession () {
             is_working = false
-            engine.syncBalance(false, function (err) {
+            engine.syncBalance(true, function (err) {
               if (!err && s.balance.asset === undefined) {
                 // TODO not the nicest place to verify the state, but did not found a better one
                 throw new Error('Error during syncing balance. Please check your API-Key')
