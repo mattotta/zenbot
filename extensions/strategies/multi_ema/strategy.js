@@ -21,6 +21,14 @@ module.exports = function container (get, set, clear) {
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
 
+      // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
+      if (s.options.ema_type_weak === 'ta_ema') {
+        s.options.ema_periods_weak = Math.max(s.options.ema_periods_weak, 2)
+      }
+      if (s.options.ema_type_strong === 'ta_ema') {
+        s.options.ema_periods_strong = Math.max(s.options.ema_periods_strong, 2)
+      }
+
       // get order type
       if (!s.options.order_type_weak) {
         s.options.order_type_weak = s.options.order_type
