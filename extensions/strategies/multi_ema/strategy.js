@@ -31,29 +31,6 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
-      s.strategy.calculateEma(s, 'weak')
-      s.strategy.calculateEma(s, 'strong')
-
-      s.period.trend = null
-
-      if ((typeof s.period.trend_ema_stddev_weak === 'number') && (typeof s.period.trend_ema_stddev_strong === 'number')) {
-
-        let ema_weak = Math.max(s.period.trend_ema_stddev_weak, s.options.neutral_rate_min_weak)
-        let ema_strong = Math.max(s.period.trend_ema_stddev_strong, s.options.neutral_rate_min_strong)
-
-        if (s.period.trend_ema_rate_strong >= ema_strong) {
-          s.period.trend = 'up_strong'
-        }
-        else if (s.period.trend_ema_rate_strong <= (ema_strong * -1)) {
-          s.period.trend = 'down_strong'
-        }
-        else if (s.period.trend_ema_rate_weak >= ema_weak) {
-          s.period.trend = 'up_weak'
-        }
-        else if (s.period.trend_ema_rate_weak <= (ema_weak * -1)) {
-          s.period.trend = 'down_weak'
-        }
-      }
     },
 
     calculateEma: function (s, type) {
@@ -93,6 +70,30 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
+      s.strategy.calculateEma(s, 'weak')
+      s.strategy.calculateEma(s, 'strong')
+
+      s.period.trend = null
+
+      if ((typeof s.period.trend_ema_stddev_weak === 'number') && (typeof s.period.trend_ema_stddev_strong === 'number')) {
+
+        let ema_weak = Math.max(s.period.trend_ema_stddev_weak, s.options.neutral_rate_min_weak)
+        let ema_strong = Math.max(s.period.trend_ema_stddev_strong, s.options.neutral_rate_min_strong)
+
+        if (s.period.trend_ema_rate_strong >= ema_strong) {
+          s.period.trend = 'up_strong'
+        }
+        else if (s.period.trend_ema_rate_strong <= (ema_strong * -1)) {
+          s.period.trend = 'down_strong'
+        }
+        else if (s.period.trend_ema_rate_weak >= ema_weak) {
+          s.period.trend = 'up_weak'
+        }
+        else if (s.period.trend_ema_rate_weak <= (ema_weak * -1)) {
+          s.period.trend = 'down_weak'
+        }
+      }
+
       let signal = s.strategy.getSignal(s, true)
 
       if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
