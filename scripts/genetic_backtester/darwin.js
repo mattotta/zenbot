@@ -360,8 +360,8 @@ let strategies = {
     ema_periods_strong: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     neutral_rate_weak: RangeItems(['auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong: RangeItems(['auto', 'auto_trend', 'auto_new']),
-    neutral_rate_min_weak: RangeFloat(0, 1),
-    neutral_rate_min_strong: RangeFloat(0, 1),
+    neutral_rate_min_weak: RangeFloat(0, 0.1),
+    neutral_rate_min_strong: RangeFloat(0.1, 1.0),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember'])
   },
   neural: {
@@ -682,18 +682,18 @@ selectedStrategies.forEach(function(v) {
   }
 });
 
-var isUsefulKey = key => {
+let isUsefulKey = key => {
   if(key == "filename" || key == "show_options" || key == "sim") return false;
   return true;
 }
-var generateCommandParams = input => {
+let generateCommandParams = input => {
   input = input.params.replace("module.exports =","");
   input = JSON.parse(input);
 
-  var result = "";
-  var keys = Object.keys(input);
+  let result = "";
+  let keys = Object.keys(input);
   for(i = 0;i < keys.length;i++){
-    var key = keys[i];
+    let key = keys[i];
     if(isUsefulKey(key)){
       // selector should be at start before keys
       if(key == "selector"){
@@ -706,7 +706,7 @@ var generateCommandParams = input => {
   }
   return result;
 }
-var saveGenerationData = function(csvFileName, jsonFileName, dataCSV, dataJSON, callback){
+let saveGenerationData = function(csvFileName, jsonFileName, dataCSV, dataJSON, callback){
   fs.writeFile(csvFileName, dataCSV, err => {
     if (err) throw err;
     console.log("> Finished writing generation csv to " + csvFileName);
@@ -762,17 +762,21 @@ let simulateGeneration = () => {
       fieldNames: fieldNamesGeneral
     });
 
-    let fileDate = Math.round(+new Date() / 1000);
-    let csvFileName = `simulations/backtesting_${fileDate}.csv`;
-    
     let poolData = {};
     selectedStrategies.forEach(function(v) {
       poolData[v] = pools[v]['pool'].population();
     });
-
-    let jsonFileName = `simulations/generation_data_${fileDate}_gen_${generationCount}.json`;
     let dataJSON = JSON.stringify(poolData, null, 2);
-    var filesSaved = 0;
+
+    let fileIdentifier = Math.round(+new Date() / 1000);
+    if (selectors.length === 1) {
+      fileIdentifier = selectors[0] + '_' + fileIdentifier;
+    }
+    fileIdentifier = fileIdentifier + '_gen_' + generationCount
+
+    let csvFileName = `simulations/backtesting_${fileIdentifier}.csv`;
+    let jsonFileName = `simulations/generation_data_${fileIdentifier}.json`;
+    let filesSaved = 0;
     saveGenerationData(csvFileName, jsonFileName, dataCSV, dataJSON, (id)=>{
       filesSaved++;
       if(filesSaved == 2){        
