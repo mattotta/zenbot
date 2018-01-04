@@ -29,6 +29,20 @@ module.exports = function container (get, set, clear) {
         s.options.ema_periods_strong = Math.max(s.options.ema_periods_strong, 2)
       }
 
+      // optimize periods parameter
+      if (s.options.ema_periods_weak < s.options.ema_periods_strong) {
+        let ema_periods_strong = s.options.ema_periods_weak
+        s.options.ema_periods_weak = s.options.ema_periods_strong
+        s.options.ema_periods_strong = ema_periods_strong
+      }
+
+      // optimize neutral rate parameter
+      if (s.options.neutral_rate_min_weak > s.options.neutral_rate_min_strong) {
+        let neutral_rate_min_strong = s.options.neutral_rate_min_weak
+        s.options.neutral_rate_min_weak = s.options.neutral_rate_min_strong
+        s.options.neutral_rate_min_strong = neutral_rate_min_strong
+      }
+
       // get order type
       if (!s.options.order_type_weak) {
         s.options.order_type_weak = s.options.order_type

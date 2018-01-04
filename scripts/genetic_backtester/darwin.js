@@ -360,8 +360,8 @@ let strategies = {
     ema_periods_strong: Range(TREND_EMA_MIN, TREND_EMA_MAX),
     neutral_rate_weak: RangeItems(['auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong: RangeItems(['auto', 'auto_trend', 'auto_new']),
-    neutral_rate_min_weak: RangeFloat(0, 0.1),
-    neutral_rate_min_strong: RangeFloat(0.1, 1.0),
+    neutral_rate_min_weak: RangeFloat(0, 1),
+    neutral_rate_min_strong: RangeFloat(0, 1),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember'])
   },
   neural: {
