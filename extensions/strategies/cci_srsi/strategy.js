@@ -10,7 +10,7 @@ module.exports = function container (get, set, clear) {
       this.option('period', 'period length, same as --period_length', String, '20m')
       this.option('period_length', 'period length, same as --period', String, '20m')
       this.option('min_periods', 'min. number of history periods', Number, 30)
-      this.option('ema_acc', 'sideways threshold (0.01-1.0)', Number, 0.03)
+      this.option('ema_acc', 'sideways threshold (0.2-0.4)', Number, 0.03)
       this.option('cci_periods', 'number of RSI periods', Number, 14)
       this.option('rsi_periods', 'number of RSI periods', Number, 14)
       this.option('srsi_periods', 'number of RSI periods', Number, 9)
@@ -21,7 +21,6 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_cci', 'buy when CCI reaches or drops below this value', Number, -90)
       this.option('overbought_cci', 'sell when CCI reaches or goes above this value', Number, 140)
       this.option('constant', 'constant', Number, 0.015)
-      this.option('reversed', 'act reversed on trend and/or side market', String, 'none')
       console.log('If you have questions about this strategy, contact me... @talvasconcelos');
     },
 
@@ -31,8 +30,8 @@ module.exports = function container (get, set, clear) {
       if (typeof s.period.trend_ema !== 'undefined')
         s.trend = s.period.trend_ema > s.lookback[0].trend_ema ? 'up' : 'down'
 
-      // compute Stochastic RSI
-      get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
+		  // compute Stochastic RSI
+		  get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
 
       // compute CCI
       get('lib.cci')(s, 'cci', s.options.cci_periods, s.options.constant)
@@ -48,37 +47,37 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
-      if (!s.in_preroll && typeof s.trend !== 'undefined') {
+    	if (!s.in_preroll && typeof s.trend !== 'undefined') {
 
         // Sideways Market
         if (s.period.acc < s.options.ema_acc) {
           // Buy signal
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
-            if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'side' ? 'sell' : 'buy')
+  				  if (!s.cci_fromAbove && !s.rsi_fromAbove) {
+              s.signal = 'buy'
             }
           }
           // Sell signal
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'side' ? 'buy' : 'sell')
+                s.signal = 'sell'
             }
           }
           //cb()
         }
         // Buy signal
         if (s.trend === 'up') {
-          if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
-            if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'trend' ? 'sell' : 'buy')
+        	if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
+  				  if (!s.cci_fromAbove && !s.rsi_fromAbove) {
+              s.signal = 'buy'
             }
           }
         }
-        // Sell signal
+			  // Sell signal
         if (s.trend === 'down') {
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = (s.options.reversed == 'both' || s.options.reversed == 'trend' ? 'buy' : 'sell')
+                s.signal = 'sell'
             }
           }
         }
@@ -103,6 +102,6 @@ module.exports = function container (get, set, clear) {
       }
       return cols
     }
-  }
+	}
 }
 /* Made by talvasconcelos*/
