@@ -74,7 +74,7 @@ let runCommand = (strategy, cb) => {
     reverse_trend_ema: `--trend_ema=${strategy.trend_ema} --oversold_rsi=${strategy.oversold_rsi} --oversold_rsi_periods=${strategy.oversold_rsi_periods} --neutral_rate=${strategy.neutral_rate}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh'; // Use 'win32' for 64 bit windows too
-  let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period} --min_periods=${strategy.min_periods} --silent --filename=none`;
+  let command = `${zenbot_cmd} sim ${simArgs} ${strategyArgs[strategyName]} --period=${strategy.period_length} --min_periods=${strategy.min_periods} --silent --filename=none`;
   console.log(moment().format('YYYY-MM-DD HH:mm:ss') + ` [ ${countArr.length}/${strategies[strategyName].length} ] ${command}`);
 
   shell.exec(command, {silent:true, async:true}, (code, stdout, stderr) => {
@@ -187,7 +187,7 @@ let processOutput = (output, command) => {
     oversoldRsi:        params.oversold_rsi,
 
     days:               days,
-    period:             params.period_length,
+    period_length:      params.period_length,
     min_periods:        params.min_periods,
     roi:                roi,
     wlRatio:            losses > 0 ? roundp(wins / losses, 3) : 'Infinity',
@@ -197,7 +197,7 @@ let processOutput = (output, command) => {
 
 let strategies = {
   cci_srsi: objectProduct({
-    period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
+    period_length: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
     min_periods: [52, 200],
     rsi_periods: [14, 20],
     srsi_periods: [14, 20],
@@ -211,7 +211,7 @@ let strategies = {
     reversed: ['none', 'both', 'side', 'trend']
   }),
   srsi_macd: objectProduct({
-    period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
+    period_length: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
     min_periods: [52, 200],
     rsi_periods: [14, 20],
     srsi_periods: [14, 20],
@@ -226,7 +226,7 @@ let strategies = {
     down_trend_threshold: [0]
   }),
   macd: objectProduct({
-    period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
+    period_length: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
     min_periods: [52],
     ema_short_period: range(10, 15),
     ema_long_period: range(20, 30),
@@ -237,7 +237,7 @@ let strategies = {
     overbought_rsi: range(70, 70)
   }),
   rsi: objectProduct({
-    period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
+    period_length: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
     min_periods: [52],
     rsi_periods: range(10, 30),
     oversold_rsi: range(20, 35),
@@ -247,27 +247,25 @@ let strategies = {
     rsi_divisor: range(2, 2)
   }),
   sar: objectProduct({
-    period: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
+    period_length: ['1m', '2m', '5m', '10m', '20m', '30m', '1h'],
     min_periods: [52],
     sar_af: range(0.01, 0.055, 0.005),
     sar_max_af: range(0.1, 0.55, 0.05)
   }),
   speed: objectProduct({
-    period: ['5s', '10s', '1m'],
+    period_length: ['5s', '10s', '1m'],
     min_periods: [52],
-    baseline_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 32, 50, 70, 100, 150, 200, 300, 500, 700, 1000, 1500, 200, 3000],
-    trigger_factor: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+    baseline_periods: range(1000, 5000, 200),
+    trigger_factor: range(1.0, 2.0, 0.1)
   }),
   trend_ema: objectProduct({
-    period: ['6s', '12s', '30s', '1m'],
-    min_periods: [60],
-    trend_ema: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26],
-    neutral_rate: ['auto', 'auto_trend'],
-    neutral_rate_min: [0.0001, 0.001, 0.01, 0.1],
-    oversold_rsi_periods: [1, 2, 3, 4, 6, 8, 12, 16, 20, 26, 34, 45, 60],
-    oversold_rsi: [0, 5, 10, 15, 20, 30, 50],
-    reversed: [0, 1]
-  }),
+    periodLength: ['2m'],
+    min_periods: [52],
+    trend_ema: range(TREND_EMA_MIN, TREND_EMA_MAX),
+    neutral_rate: (NEUTRAL_RATE_AUTO ? new Array('auto') : []).concat(range(NEUTRAL_RATE_MIN, NEUTRAL_RATE_MAX).map(r => r / 100)),
+    oversold_rsi_periods: range(OVERSOLD_RSI_PERIODS_MIN, OVERSOLD_RSI_PERIODS_MAX),
+    oversold_rsi: range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX)
+  })
 };
 
 let args = process.argv;
@@ -302,7 +300,7 @@ parallel(tasks, PARALLEL_LIMIT, (err, results) => {
   })
   results.sort((a,b) => (a.roi < b.roi) ? 1 : ((b.roi < a.roi) ? -1 : 0));
   let fileName = `backtesting_${Math.round(+new Date()/1000)}.csv`;
-  let filedsGeneral = ['roi', 'vsBuyHold', 'errorRate', 'wlRatio', 'frequency', 'endBalance', 'buyHold', 'wins', 'losses', 'period', 'min_periods', 'days'];
+  let filedsGeneral = ['roi', 'vsBuyHold', 'errorRate', 'wlRatio', 'frequency', 'endBalance', 'buyHold', 'wins', 'losses', 'period_length', 'min_periods', 'days'];
   let filedNamesGeneral = ['ROI (%)', 'VS Buy Hold (%)', 'Error Rate (%)', 'Win/Loss Ratio', '# Trades/Day', 'Ending Balance ($)', 'Buy Hold ($)', '# Wins', '# Losses', 'Period', 'Min Periods', '# Days'];
   let fields = {
     cci_srsi: filedsGeneral.concat(['cciPeriods', 'rsiPeriods', 'srsiPeriods', 'srsiK', 'srsiD', 'oversoldRsi', 'overboughtRsi', 'oversoldCci', 'overboughtCci', 'Constant', 'params']),
