@@ -350,9 +350,9 @@ let strategies = {
     // -- common
     selector: RangeItems(selectors),
     period_length: RangePeriod(1, 120, 's'),
-    sell_stop_pct: Range0(1, 50),
-    buy_stop_pct: Range0(1, 50),
-    profit_stop_enable_pct: Range0(1, 20),
+    sell_stop_pct: Range0(1, 10),
+    buy_stop_pct: Range0(1, 10),
+    profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
     // -- strategy
