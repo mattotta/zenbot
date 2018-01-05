@@ -602,10 +602,12 @@ let simArgs = {
     let list = [];
     for(let name in this) {
       if (this.hasOwnProperty(name) && typeof this[name] !== 'function') {
-        if (this[name] === true) {
-          list.push('--' + name);
-        } else if (this[name] !== false) {
-          list.push('--' + name + '="' + this[name] + '"');
+        if (name !== 'days' || this.hasOwnProperty('start')) {
+          if (this[name] === true) {
+            list.push('--' + name);
+          } else if (this[name] !== false) {
+            list.push('--' + name + '="' + this[name] + '"');
+          }
         }
       }
     }
