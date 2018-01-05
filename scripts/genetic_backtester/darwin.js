@@ -617,17 +617,6 @@ let simArgs = {
 
 if (argv.start) {
   simArgs.start = argv.start;
-  if (!argv.days) {
-    let start = moment(argv.start).valueOf();
-    let end
-    if (argv.end) {
-      simArgs.end = argv.end
-      end = moment(argv.end).valueOf();
-    } else {
-      end = tb('1d').toMilliseconds();
-    }
-    simArgs.days = Math.floor((end - start) / 86400000) + 1;
-  }
 }
 if (argv.days) {
   simArgs.days = argv.days;
@@ -641,6 +630,7 @@ if (argv.asset_capital) {
 if (argv.symmetrical) {
   simArgs.symmetrical = 'true';
 }
+console.log(simArgs)
 
 let strategyName = (argv.use_strategies) ? argv.use_strategies : 'all';
 let populationFileName = (argv.population_data) ? argv.population_data : null;
@@ -725,6 +715,7 @@ let generationCount = 0;
 let simulateGeneration = () => {
   console.log(`\n\n=== Simulating generation ${++generationCount} ===\n`);
 
+  let days
   if (!argv.days && argv.start) {
     let start = moment(argv.start).valueOf();
     let end
@@ -733,11 +724,13 @@ let simulateGeneration = () => {
     } else {
       end = tb('1d').toMilliseconds();
     }
-    simArgs.days = Math.floor((end - start) / 86400000) + 1;
+    days = Math.floor((end - start) / 86400000) + 1;
+  } else {
+    days = argv.days
   }
 
   selectors.forEach(function(s) {
-    runUpdate(simArgs.days, s);
+    runUpdate(days, s);
   })
 
   iterationCount = 1;
@@ -797,7 +790,6 @@ let simulateGeneration = () => {
           let bestCommand = generateCommandParams(results[0]);
           
           bestCommand = prefix + bestCommand;
-          bestCommand = bestCommand + ' --days=' + argv.days + ' --asset_capital=' + argv.asset_capital + ' --currency_capital=' + argv.currency_capital;
           
           console.log(bestCommand + '\n');
             
