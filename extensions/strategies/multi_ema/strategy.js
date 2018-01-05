@@ -140,40 +140,40 @@ module.exports = function container (get, set, clear) {
       if ((typeof s.period.trend_ema_rate_weak === 'number' && typeof s.period.trend_ema_stddev_weak === 'number') ||
         (typeof s.period.trend_ema_rate_strong === 'number' && typeof s.period.trend_ema_stddev_strong === 'number')) {
         let signal = s.strategy.getSignal(s, false)
-        let color = 'grey'
-        if (signal === 'buy') {
-          color = 'green'
-        } else if (signal === 'sell') {
-          color = 'red'
+        let sign = '  |  '
+        let color_weak = 'grey'
+        let color_strong = 'grey'
+        let color_sign= 'grey'
+        if (s.period.trend === 'down_strong') {
+          sign = '<<|  '
+          color_sign = 'red'
+          color_strong = 'red'
+        } else if (s.period.trend === 'down_weak') {
+          sign = ' <|  '
+          color_sign = 'red'
+          color_weak = 'red'
+        } else if (s.period.trend === 'up_weak') {
+          sign = '  |> '
+          color_sign = 'green'
+          color_weak = 'green'
+        } else if (s.period.trend === 'up_strong') {
+          sign = '  |>>'
+          color_sign = 'green'
+          color_strong = 'green'
         }
         if (typeof s.period.trend_ema_rate_weak === 'number' && typeof s.period.trend_ema_stddev_weak === 'number') {
-          cols.push(z(8, n(s.period.trend_ema_rate_weak).format('0.0000'), ' ')[color])
+          cols.push(z(8, n(s.period.trend_ema_rate_weak).format('0.0000'), ' ')[color_weak])
           cols.push(z(8, n(s.period.trend_ema_stddev_weak).format('0.0000'), ' ').grey)
         } else  {
           cols.push('                  ')
         }
         if (typeof s.period.trend_ema_rate_strong === 'number' && typeof s.period.trend_ema_stddev_strong === 'number') {
-          cols.push(z(8, n(s.period.trend_ema_rate_strong).format('0.0000'), ' ')[color])
+          cols.push(z(8, n(s.period.trend_ema_rate_strong).format('0.0000'), ' ')[color_strong])
           cols.push(z(8, n(s.period.trend_ema_stddev_strong).format('0.0000'), ' ').grey)
         } else {
           cols.push('                  ')
         }
-        let sign = '  |  '
-        color = 'grey'
-        if (s.period.trend === 'down_strong') {
-          sign = '<<|  '
-          color = 'red'
-        } else if (s.period.trend === 'down_weak') {
-          sign = ' <|  '
-          color = 'red'
-        } else if (s.period.trend === 'up_weak') {
-          sign = '  |> '
-          color = 'green'
-        } else if (s.period.trend === 'up_strong') {
-          sign = '  |>>'
-          color = 'green'
-        }
-        cols.push(z(7, sign, ' ')[color])
+        cols.push(z(7, sign, ' ')[color_sign])
       } else {
         cols.push('                                           ')
       }
