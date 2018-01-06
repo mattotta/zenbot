@@ -26,16 +26,21 @@ module.exports = function container (get, set, clear) {
       this.option('min_diff_pct', 'Minimal difference to trigger a signal', Number, 0)
     },
 
-
     calculate: function (s) {
-      get('lib.vwap')(s, 'vwap', s.options.vwap_length, s.options.vwap_max)//gold
-
-      get('lib.ema')(s, 'ema1', s.options.emalen1)//green
-      // get('lib.sma')(s, 'sma1', s.options.smalen1, 'high')//red
-      // get('lib.sma')(s, 'sma2', s.options.smalen2)//purple
+      if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
+        get('lib.vwap')(s, 'vwap', s.options.vwap_length, s.options.vwap_max)//gold
+        get('lib.ema')(s, 'ema1', s.options.emalen1)//green
+        // get('lib.sma')(s, 'sma1', s.options.smalen1, 'high')//red
+        // get('lib.sma')(s, 'sma2', s.options.smalen2)//purple
+      }
     },
 
     onPeriod: function (s, cb) {
+      get('lib.vwap')(s, 'vwap', s.options.vwap_length, s.options.vwap_max)//gold
+      get('lib.ema')(s, 'ema1', s.options.emalen1)//green
+      // get('lib.sma')(s, 'sma1', s.options.smalen1, 'high')//red
+      // get('lib.sma')(s, 'sma2', s.options.smalen2)//purple
+
       let emagreen = s.period.ema1,
         vwapgold = s.period.vwap
 

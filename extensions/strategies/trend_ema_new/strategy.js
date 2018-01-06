@@ -37,6 +37,12 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
+      if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
+        s.strategy.calculateTrend(s)
+      }
+    },
+
+    calculateTrend: function (s) {
       get('lib.ema')(s, 'trend_ema', s.options.trend_ema)
       if (s.period.trend_ema && s.lookback[0] && s.lookback[0].trend_ema) {
         s.period.trend_ema_rate = (s.period.trend_ema - s.lookback[0].trend_ema) / s.lookback[0].trend_ema * 100
@@ -89,13 +95,15 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
+      s.strategy.calculateTrend(s)
+
       let signal = s.strategy.getSignal(s, true)
 
       if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
         // avoid multiple buy signals
         signal = null
       }
-        
+
       s.signal = signal
       cb()
     },

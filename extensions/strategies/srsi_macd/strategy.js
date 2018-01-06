@@ -24,38 +24,47 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
-		// compute Stochastic RSI
-		get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
+      if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
+        s.strategy.calculateTrend(s)
+      }
+    },
 
-        // compute MACD
-        get('lib.ema')(s, 'ema_short', s.options.ema_short_period)
-        get('lib.ema')(s, 'ema_long', s.options.ema_long_period)
-        if (s.period.ema_short && s.period.ema_long) {
-          s.period.macd = (s.period.ema_short - s.period.ema_long)
-          get('lib.ema')(s, 'signal', s.options.signal_period, 'macd')
-          if (s.period.signal) {
-            s.period.macd_histogram = s.period.macd - s.period.signal
-          }
+    calculateTrend: function (s) {
+      // compute Stochastic RSI
+      get('lib.srsi')(s, 'srsi', s.options.rsi_periods, s.options.srsi_k, s.options.srsi_d)
+
+      // compute MACD
+      get('lib.ema')(s, 'ema_short', s.options.ema_short_period)
+      get('lib.ema')(s, 'ema_long', s.options.ema_long_period)
+      if (s.period.ema_short && s.period.ema_long) {
+        s.period.macd = (s.period.ema_short - s.period.ema_long)
+        get('lib.ema')(s, 'signal', s.options.signal_period, 'macd')
+        if (s.period.signal) {
+          s.period.macd_histogram = s.period.macd - s.period.signal
         }
+      }
     },
 
     onPeriod: function (s, cb) {
-    	if (!s.in_preroll)
-			if (typeof s.period.macd_histogram === 'number' && typeof s.lookback[0].macd_histogram === 'number' && typeof s.period.srsi_K === 'number' && typeof s.period.srsi_D === 'number')
-				// Buy signal
-        		if (s.period.macd_histogram >= s.options.up_trend_threshold)
-					if (s.period.srsi_K > s.period.srsi_D && s.period.srsi_K > s.lookback[0].srsi_K && s.period.srsi_K < s.options.oversold_rsi)
-						s.signal = 'buy'
+      s.strategy.calculateTrend(s)
 
-				// Sell signal
-				if (s.period.macd_histogram < s.options.down_trend_threshold)
-					if (s.period.srsi_K < s.period.srsi_D && s.period.srsi_K < s.lookback[0].srsi_K && s.period.srsi_K > s.options.overbought_rsi)
-						s.signal = 'sell'
+      if (!s.in_preroll)
+        if (typeof s.period.macd_histogram === 'number' && typeof s.lookback[0].macd_histogram === 'number' && typeof s.period.srsi_K === 'number' && typeof s.period.srsi_D === 'number')
+        // Buy signal
+          if (s.period.macd_histogram >= s.options.up_trend_threshold)
+            if (s.period.srsi_K > s.period.srsi_D && s.period.srsi_K > s.lookback[0].srsi_K && s.period.srsi_K < s.options.oversold_rsi)
+              s.signal = 'buy'
 
-				// Hold
-				//s.signal = null;
-		cb()
+      // Sell signal
+      if (s.period.macd_histogram < s.options.down_trend_threshold)
+        if (s.period.srsi_K < s.period.srsi_D && s.period.srsi_K < s.lookback[0].srsi_K && s.period.srsi_K > s.options.overbought_rsi)
+          s.signal = 'sell'
+
+      // Hold
+      //s.signal = null;
+      cb()
     },
+
     onReport: function (s) {
       var cols = []
       if (typeof s.period.macd_histogram === 'number') {
@@ -74,5 +83,5 @@ module.exports = function container (get, set, clear) {
       }
       return cols
     }
-	}
+  }
 }

@@ -20,6 +20,12 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
+      if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
+        s.strategy.calculateTrend(s)
+      }
+    },
+
+    calculateTrend: function (s) {
       get('lib.ema')(s, 'trend_ema', s.options.trend_ema, s.options.ema_source)
       if (s.options.oversold_rsi) {
         // sync RSI display with oversold RSI periods
@@ -58,6 +64,8 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
+      s.strategy.calculateTrend(s)
+
       if (!s.in_preroll && typeof s.period.oversold_rsi === 'number') {
         if (s.oversold) {
           s.oversold = false
