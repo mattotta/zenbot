@@ -6,7 +6,7 @@ module.exports = function container (get, set, clear) {
     name: 'trend_ema',
     description: 'Buy when (EMA - last(EMA) > 0) and sell when (EMA - last(EMA) < 0). Optional buy on low RSI.',
 
-    getOptions: function () {
+    getOptions: function (s) {
       this.option('period', 'period length, same as --period_length', String, '2m')
       this.option('period_length', 'period length, same as --period', String, '2m')
       this.option('min_periods', 'min. number of history periods', Number, 52)
@@ -17,6 +17,8 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('ema_source', 'buy when RSI reaches this value', String, 'close')
       this.option('reversed', 'act reversed on trend', Number, 0)
+      
+      s.options.order_type = s.options.reversed ? 'taker' : 'maker'
     },
 
     calculate: function (s) {
