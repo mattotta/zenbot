@@ -255,7 +255,7 @@ let strategies = {
   crossover_vwap: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -274,7 +274,7 @@ let strategies = {
   cci_srsi: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -301,7 +301,7 @@ let strategies = {
   srsi_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -327,7 +327,7 @@ let strategies = {
   macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -367,7 +367,7 @@ let strategies = {
   neural: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -389,7 +389,7 @@ let strategies = {
   rsi: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -410,7 +410,7 @@ let strategies = {
   sar: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(2, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -427,7 +427,7 @@ let strategies = {
   speed: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -444,7 +444,7 @@ let strategies = {
   trend_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -486,7 +486,7 @@ let strategies = {
   trust_distrust: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -507,7 +507,7 @@ let strategies = {
   ta_macd: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -530,7 +530,7 @@ let strategies = {
   ta_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -550,7 +550,7 @@ let strategies = {
   ts_crossover: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
@@ -569,7 +569,7 @@ let strategies = {
   ts_crossover2: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 'm'),
+    period_length: RangePeriod(1, 120, 's'),
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
