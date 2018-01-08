@@ -57,7 +57,8 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     trend_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --min_periods=${phenotype.min_periods} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
     trust_distrust: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
-    ta_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`
+    ta_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
+    dema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`
   };
   let zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : './zenbot.sh';
   let command = `${zenbot_cmd} sim ${phenotype.selector} ${simArgs.toString()} ${commonArgs} ${strategyArgs[taskStrategyName]}`;
@@ -128,6 +129,8 @@ let processOutput = output => {
   let errorRate     = errMatch !== null ? parseInt(errMatch[1]) : 0;
   let fees          = feeMatch !== null ? feeMatch[1] : 0;
   let days = parseInt(params.days);
+  let start = parseInt(params.start);
+  let end = parseInt(params.end);
 
   let roi = roundp(
     ((endBalance - params.currency_capital) / params.currency_capital) * 100,
@@ -151,6 +154,17 @@ let processOutput = output => {
   delete r.show_options;
   delete r.verbose;
   delete r.silent;
+  r.selector = r.selector.normalized
+  
+  if (start) {
+    r.start = moment(start).format("YYYYMMDDhhmm");
+  }
+  if (end) {
+    r.end = moment(end).format("YYYYMMDDhhmm");
+  }
+  if (!start && !end && params.days) {
+    r.days = params.days;
+  }
 
   return {
     params: 'module.exports = ' + JSON.stringify(r),
@@ -487,6 +501,25 @@ let strategies = {
     overbought_rsi_periods: Range(1, 50),
     overbought_rsi: Range(20, 100)
   },
+  trendline: {
+    // -- common
+    selector: RangeItems(selectors),
+    period_length: RangePeriod(1, 120, 's'),
+    min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMakerTaker(),
+    sell_stop_pct: Range0(1, 10),
+    buy_stop_pct: Range0(1, 10),
+    profit_stop_enable_pct: Range(0, 0),
+    profit_stop_pct: Range(1, 20),
+
+    // -- strategy
+    lastpoints: Range(20, 500),
+    avgpoints: Range(300, 3000),
+    lastpoints2: Range(5, 300),
+    avgpoints2: Range(50, 1000),
+  },
   ta_ema: {
     // -- common
     selector: RangeItems(selectors),
@@ -506,7 +539,28 @@ let strategies = {
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
     neutral_rate: RangeItems(['auto', 'auto_trend']),
     neutral_rate_min: RangeFloat(0, 1)
-  }
+  },
+  dema: {
+    // -- common
+    selector: RangeItems(selectors),
+    period_length: RangePeriod(1, 120, 's'),
+    min_periods: Range(1, 200),
+    markdown_buy_pct: RangeFloat(0, 0),
+    markup_sell_pct: RangeFloat(0, 0),
+    order_type: RangeMakerTaker(),
+    sell_stop_pct: Range0(1, 10),
+    buy_stop_pct: Range0(1, 10),
+    profit_stop_enable_pct: Range(0, 0),
+    profit_stop_pct: Range(1, 20),
+
+    // -- strategy
+    ema_short_period: Range(1, 20),
+    ema_long_period: Range(20, 100),
+    signal_period: Range(1, 20),
+    up_trend_threshold: Range(0, 50),
+    down_trend_threshold: Range(0, 50),
+    overbought_rsi_periods: Range(1, 50),
+    overbought_rsi: Range(20, 100)
 };
 
 let allStrategyNames = () => {
