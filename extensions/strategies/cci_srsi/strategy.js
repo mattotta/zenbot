@@ -21,6 +21,7 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_cci', 'buy when CCI reaches or drops below this value', Number, -90)
       this.option('overbought_cci', 'sell when CCI reaches or goes above this value', Number, 140)
       this.option('constant', 'constant', Number, 0.015)
+      this.option('reversed', 'act reversed on trend and/or side market', String, 'none')
       console.log('If you have questions about this strategy, contact me... @talvasconcelos');
     },
 
@@ -62,13 +63,25 @@ module.exports = function container (get, set, clear) {
           // Buy signal
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
             if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = 'buy'
+              if (s.options.reversed === 'both' || s.options.reversed === 'side') {
+                s.signal = 'sell'
+                s.options.order_type = 'taker'
+              } else {
+                s.signal = 'buy'
+                s.options.order_type = 'maker'
+              }
             }
           }
           // Sell signal
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = 'sell'
+              if (s.options.reversed === 'both' || s.options.reversed === 'side') {
+                s.signal = 'buy'
+                s.options.order_type = 'taker'
+              } else {
+                s.signal = 'sell'
+                s.options.order_type = 'maker'
+              }
             }
           }
           //cb()
@@ -77,7 +90,13 @@ module.exports = function container (get, set, clear) {
         if (s.trend === 'up') {
           if (s.period.cci <= s.options.oversold_cci && /*s.period.srsi_K > s.period.srsi_D &&*/ s.period.srsi_K <= s.options.oversold_rsi) {
             if (!s.cci_fromAbove && !s.rsi_fromAbove) {
-              s.signal = 'buy'
+              if (s.options.reversed === 'both' || s.options.reversed === 'trend') {
+                s.signal = 'sell'
+                s.options.order_type = 'taker'
+              } else {
+                s.signal = 'buy'
+                s.options.order_type = 'maker'
+              }
             }
           }
         }
@@ -85,7 +104,13 @@ module.exports = function container (get, set, clear) {
         if (s.trend === 'down') {
           if (s.period.cci >= s.options.overbought_cci && /*s.period.srsi_K < s.period.srsi_D &&*/ s.period.srsi_K >= s.options.overbought_rsi) {
             if (s.cci_fromAbove || s.rsi_fromAbove) {
-              s.signal = 'sell'
+              if (s.options.reversed === 'both' || s.options.reversed === 'trend') {
+                s.signal = 'buy'
+                s.options.order_type = 'taker'
+              } else {
+                s.signal = 'sell'
+                s.options.order_type = 'maker'
+              }
             }
           }
         }

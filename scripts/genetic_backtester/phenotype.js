@@ -27,10 +27,6 @@ module.exports = {
         r[k] = (Math.random() * (v.max - v.min)) + v.min;
       } else if (v.type === 'makertaker') {
         r[k] = (Math.random() > 0.5) ? 'maker' : 'taker';
-      } else if (v.type === 'maker') {
-        r[k] = 'maker';
-      } else if (v.type === 'taker') {
-        r[k] = 'taker';
       } else if (v.type === 'period') {
         let s = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
         r[k] = s + v.period;
