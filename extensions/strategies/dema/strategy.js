@@ -20,6 +20,12 @@ module.exports = function container (get, set, clear) {
     },
 
     calculate: function (s) {
+      if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
+        s.strategy.calculateTrend(s)
+      }
+    },
+
+    calculateTrend: function (s) {
       if (s.options.overbought_rsi) {
         // sync RSI display with overbought RSI periods
         s.options.rsi_periods = s.options.overbought_rsi_periods
@@ -39,6 +45,8 @@ module.exports = function container (get, set, clear) {
     },
 
     onPeriod: function (s, cb) {
+      s.strategy.calculateTrend(s)
+      
       if (!s.in_preroll && typeof s.period.overbought_rsi === 'number') {
         if (s.overbought) {
           s.overbought = false

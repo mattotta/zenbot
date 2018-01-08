@@ -561,6 +561,7 @@ let strategies = {
     down_trend_threshold: Range(0, 50),
     overbought_rsi_periods: Range(1, 50),
     overbought_rsi: Range(20, 100)
+  }
 };
 
 let allStrategyNames = () => {
