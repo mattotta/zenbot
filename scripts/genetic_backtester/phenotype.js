@@ -4,7 +4,7 @@
  * 07/01/2017
  */
 
-let PROPERTY_MUTATION_CHANCE = 0.30;
+let PROPERTY_MUTATION_CHANCE = 0.50;
 let PROPERTY_CROSSOVER_CHANCE = 0.50;
 
 module.exports = {
@@ -40,22 +40,23 @@ module.exports = {
 
   mutation: function(oldPhenotype, strategy) {
     let r = module.exports.create(strategy);
+
     for (let k in oldPhenotype) {
       if (k === 'sim') continue;
 
-      let v = oldPhenotype[k];
-      r[k] = (Math.random() < PROPERTY_MUTATION_CHANCE) ? r[k] : oldPhenotype[k];
+      if (typeof r[k] === 'undefined' || Math.random() > PROPERTY_MUTATION_CHANCE) {
+        r[k] = oldPhenotype[k]
+      }
     }
     return r;
   },
 
   crossover: function(phenotypeA, phenotypeB, strategy) {
+    let p = module.exports.create(strategy);
     let p1 = {};
     let p2 = {};
 
-    for (let k in strategy) {
-      if (k === 'sim') continue;
-
+    for (let k in p) {
       p1[k] = Math.random() >= PROPERTY_CROSSOVER_CHANCE ? phenotypeA[k] : phenotypeB[k];
       p2[k] = Math.random() >= PROPERTY_CROSSOVER_CHANCE ? phenotypeA[k] : phenotypeB[k];
     }
