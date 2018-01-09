@@ -121,7 +121,7 @@ module.exports = function container (get, set, clear) {
           var d = tb('1d')
           so.end_training = d.subtract(so.days_test).toMilliseconds()
         }
-        so.selector = get('lib.objectify-selector')(selector || c.selector)
+        so.selector = selector || c.selector
         so.mode = 'train'
         if (cmd.conf) {
           var overrides = require(path.resolve(process.cwd(), cmd.conf))
@@ -129,6 +129,7 @@ module.exports = function container (get, set, clear) {
             so[k] = overrides[k]
           })
         }
+        so.selector = get('lib.objectify-selector')(so.selector)
         var engine = get('lib.engine')(s)
 
         if (!so.min_periods) so.min_periods = 1

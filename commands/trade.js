@@ -21,6 +21,7 @@ module.exports = function container (get, set, clear) {
       .option('--conf <path>', 'path to optional conf overrides file')
       .option('--strategy <name>', 'strategy to use', String, c.strategy)
       .option('--order_type <type>', 'order type to use (maker/taker)', /^(maker|taker)$/i, c.order_type)
+      .option('--order_type_stop <type>', 'order type to use for stop orders (maker/taker)', /^(maker|taker)$/i, c.order_type)
       .option('--paper', 'use paper trading mode (no real trades will take place)', Boolean, false)
       .option('--manual', 'watch price and account balance, but do not perform trades automatically', Boolean, false)
       .option('--non_interactive', 'disable keyboard inputs to the bot', Boolean, false)
@@ -57,7 +58,7 @@ module.exports = function container (get, set, clear) {
             so[k] = cmd[k]
           }
         })
-
+        so.selector = selector || c.selector
         so.debug = cmd.debug
         so.stats = !cmd.disable_stats
         so.mode = so.paper ? 'paper' : 'live'
@@ -67,7 +68,7 @@ module.exports = function container (get, set, clear) {
             so[k] = overrides[k]
           })
         }
-        so.selector = get('lib.objectify-selector')(selector || c.selector)
+        so.selector = get('lib.objectify-selector')(so.selector)
         var exchange = get('exchanges.' + so.selector.exchange_id)
         if (!exchange) {
           console.error('cannot trade ' + so.selector.normalized + ': exchange not implemented')

@@ -43,7 +43,7 @@ let selector = (argv.selector) ? argv.selector : 'gdax.BTC-EUR';
 let selectors = selector.split(',')
 
 let runCommand = (taskStrategyName, phenotype, cb) => {
-  let commonArgs = `--strategy=${taskStrategyName} --period_length=${phenotype.period_length} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct}`;
+  let commonArgs = `--strategy=${taskStrategyName} --period_length=${phenotype.period_length} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct} --order_type_stop=${phenotype.order_type_stop}`;
   let strategyArgs = {
     crossover_vwap: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --emalen1=${phenotype.emalen1} --vwap_length=${phenotype.vwap_length} --vwap_max=${phenotype.vwap_max} --min_diff_pct=${phenotype.min_diff_pct}`,
     cci_srsi: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --min_periods=${phenotype.min_periods} --cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant} --reversed=${phenotype.reversed} --ema_acc=${phenotype.ema_acc}`,
@@ -155,16 +155,6 @@ let processOutput = output => {
   delete r.verbose;
   delete r.silent;
   r.selector = r.selector.normalized
-  
-  if (start) {
-    r.start = moment(start).format("YYYYMMDDhhmm");
-  }
-  if (end) {
-    r.end = moment(end).format("YYYYMMDDhhmm");
-  }
-  if (!start && !end && params.days) {
-    r.days = params.days;
-  }
 
   return {
     params: 'module.exports = ' + JSON.stringify(r),
@@ -257,6 +247,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -275,6 +266,7 @@ let strategies = {
     min_periods: Range(1, 200),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -302,6 +294,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -328,6 +321,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -346,6 +340,7 @@ let strategies = {
     // -- common
     selector: RangeItems(selectors),
     period_length: RangePeriod(1, 120, 's'),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -368,6 +363,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -390,6 +386,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -411,6 +408,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -428,6 +426,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -444,6 +443,7 @@ let strategies = {
     min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -465,6 +465,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -486,6 +487,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -509,6 +511,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -528,6 +531,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),
@@ -548,6 +552,7 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
+    order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 10),
     buy_stop_pct: Range0(1, 10),
     profit_stop_enable_pct: Range(0, 0),

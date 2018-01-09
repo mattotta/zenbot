@@ -16,6 +16,7 @@ module.exports = function container (get, set, clear) {
       .option('--conf <path>', 'path to optional conf overrides file')
       .option('--strategy <name>', 'strategy to use', String, c.strategy)
       .option('--order_type <type>', 'order type to use (maker/taker)', /^(maker|taker)$/i, c.order_type)
+      .option('--order_type_stop <type>', 'order type to use for stop orders (maker/taker)', /^(maker|taker)$/i, c.order_type)
       .option('--filename <filename>', 'filename for the result output (ex: result.html). "none" to disable', String, c.filename)
       .option('--start <datetime>', 'start ("YYYYMMDDhhmm")')
       .option('--end <datetime>', 'end ("YYYYMMDDhhmm")')
@@ -77,7 +78,7 @@ module.exports = function container (get, set, clear) {
         so.show_options = !cmd.disable_options
         so.verbose = !!cmd.verbose
         so.silent = !!cmd.silent
-        so.selector = get('lib.objectify-selector')(selector || c.selector)
+        so.selector = selector || c.selector
         so.mode = 'sim'
         if (cmd.conf) {
           var overrides = require(path.resolve(process.cwd(), cmd.conf))
@@ -85,6 +86,7 @@ module.exports = function container (get, set, clear) {
             so[k] = overrides[k]
           })
         }
+        so.selector = get('lib.objectify-selector')(so.selector)
         var engine = get('lib.engine')(s)
         if (!so.min_periods) so.min_periods = 1
         var cursor, reversing, reverse_point
