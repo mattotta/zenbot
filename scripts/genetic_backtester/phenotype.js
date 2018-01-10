@@ -16,7 +16,7 @@ module.exports = {
         r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
       } else if (v.type === 'int0') {
         r[k] = 0;
-        if (Math.random() >= 0.5) {
+        if (Math.random() >= 0.25) {
           r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
         }
       } else if (v.type === 'intfactor') {
@@ -41,27 +41,27 @@ module.exports = {
   mutation: function(oldPhenotype, strategy) {
     let r = module.exports.create(strategy);
 
-    for (let k in oldPhenotype) {
-      if (k === 'sim') continue;
-
-      if (typeof r[k] === 'undefined' || Math.random() > PROPERTY_MUTATION_CHANCE) {
+    for (let k in r) {
+      if (Math.random() > PROPERTY_MUTATION_CHANCE) {
         r[k] = oldPhenotype[k]
       }
     }
+
     return r;
   },
 
   crossover: function(phenotypeA, phenotypeB, strategy) {
-    let p = module.exports.create(strategy);
-    let p1 = {};
-    let p2 = {};
+    let r = module.exports.create(strategy);
 
-    for (let k in p) {
-      p1[k] = Math.random() >= PROPERTY_CROSSOVER_CHANCE ? phenotypeA[k] : phenotypeB[k];
-      p2[k] = Math.random() >= PROPERTY_CROSSOVER_CHANCE ? phenotypeA[k] : phenotypeB[k];
+    for (let k in r) {
+      if (Math.random() >= PROPERTY_CROSSOVER_CHANCE) {
+        r[k] = phenotypeA[k];
+      } else {
+        r[k] = phenotypeB[k];
+      }
     }
 
-    return [p1, p2];
+    return r;
   },
 
   fitness: function(phenotype) {

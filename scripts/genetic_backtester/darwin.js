@@ -248,8 +248,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -267,8 +267,8 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -295,8 +295,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -322,8 +322,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -341,8 +341,8 @@ let strategies = {
     selector: RangeItems(selectors),
     period_length: RangePeriod(1, 120, 's'),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -364,8 +364,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -387,8 +387,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -409,8 +409,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -427,8 +427,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -444,8 +444,8 @@ let strategies = {
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -466,8 +466,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -488,8 +488,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -512,8 +512,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -532,8 +532,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -553,8 +553,8 @@ let strategies = {
     markup_sell_pct: RangeFloat(0, 0),
     order_type: RangeMakerTaker(),
     order_type_stop: RangeMakerTaker(),
-    sell_stop_pct: Range0(1, 10),
-    buy_stop_pct: Range0(1, 10),
+    sell_stop_pct: Range0(1, 20),
+    buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
     profit_stop_pct: Range(1, 20),
 
@@ -672,7 +672,7 @@ let generateCommandParams = input => {
     if(isUsefulKey(key)){
       // selector should be at start before keys
       if(key == "selector"){
-        result = input[key].normalized + result;
+        result = input[key] + result;
       }
       
       else result += " --"+key+"="+input[key];
@@ -760,21 +760,18 @@ let simulateGeneration = () => {
       if(filesSaved == 2){        
         console.log(`\n\nGeneration's Best Results`);
         selectedStrategies.forEach((v)=> {
-          let best = pools[v]['pool'].best();      
+          let best = pools[v]['pool'].best();
+          let bestCommand = '';
           if(best.sim){
             console.log(`\t(${v}) Sim Fitness ${best.sim.fitness}, VS Buy and Hold: ${best.sim.vsBuyHold} End Balance: ${best.sim.endBalance}, Wins/Losses ${best.sim.wins}/${best.sim.losses}.`);
-            
+            bestCommand = generateCommandParams(best.sim);
           } else {
             console.log(`\t(${v}) Result Fitness ${results[0].fitness}, VS Buy and Hold: ${results[0].vsBuyHold}, End Balance: ${results[0].endBalance}, Wins/Losses ${results[0].wins}/${results[0].losses}.`);
+            bestCommand = generateCommandParams(results[0]);
           }
 
           // prepare command snippet from top result for this strat
-          let prefix = './zenbot.sh sim ';
-          let bestCommand = generateCommandParams(results[0]);
-          
-          bestCommand = prefix + bestCommand;
-          
-          console.log(bestCommand + '\n');
+          console.log('./zenbot.sh sim ' + bestCommand + '\n');
             
           let nextGen = pools[v]['pool'].evolve();
         });
