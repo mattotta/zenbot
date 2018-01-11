@@ -54,7 +54,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     rsi: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --rsi_periods=${phenotype.rsi_periods} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --rsi_recover=${phenotype.rsi_recover} --rsi_drop=${phenotype.rsi_drop} --rsi_divisor=${phenotype.rsi_divisor}`,
     sar: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --sar_af=${phenotype.sar_af} --sar_max_af=${phenotype.sar_max_af}`,
     speed: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --baseline_periods=${phenotype.baseline_periods} --trigger_factor=${phenotype.trigger_factor}`,
-    trend_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --min_periods=${phenotype.min_periods} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
+    trend_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=${phenotype.neutral_rate} --neutral_rate_min=${phenotype.neutral_rate_min} --reversed=${phenotype.reversed}`,
     trust_distrust: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --sell_threshold=${phenotype.sell_threshold} --sell_threshold_max=${phenotype.sell_threshold_max} --sell_min=${phenotype.sell_min} --buy_threshold=${phenotype.buy_threshold} --buy_threshold_max=${phenotype.buy_threshold_max} --greed=${phenotype.greed}`,
     ta_macd: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
     ta_ema: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --trend_ema=${phenotype.trend_ema} --oversold_rsi=${phenotype.oversold_rsi} --oversold_rsi_periods=${phenotype.oversold_rsi_periods} --neutral_rate=auto_trend --neutral_rate_min=${phenotype.neutral_rate_min}`,
@@ -344,7 +344,7 @@ let strategies = {
     sell_stop_pct: Range0(1, 20),
     buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
-    profit_stop_pct: Range(1, 20),
+    profit_stop_pct: Range(0, 0),
 
     // -- strategy
     ema_periods_weak: Range(TREND_EMA_MIN, TREND_EMA_MAX),
@@ -440,14 +440,13 @@ let strategies = {
     // -- common
     selector: RangeItems(selectors),
     period_length: RangePeriod(1, 120, 's'),
-    min_periods: Range(1, 100),
     markdown_buy_pct: RangeFloat(0, 0),
     markup_sell_pct: RangeFloat(0, 0),
     order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 20),
     buy_stop_pct: Range0(1, 20),
     profit_stop_enable_pct: Range(0, 0),
-    profit_stop_pct: Range(1, 20),
+    profit_stop_pct: Range(0, 0),
 
     // -- strategy
     trend_ema: Range(TREND_EMA_MIN, TREND_EMA_MAX),
@@ -646,9 +645,10 @@ selectedStrategies.forEach(function(v) {
       return Phenotypes.crossover(phenotypeA, phenotypeB, strategies[v]);
     },
     fitnessFunction: Phenotypes.fitness,
-    doesABeatBFunction: Phenotypes.competition,
+    competeFunction: Phenotypes.competition,
     population: population,
-    populationSize: populationSize
+    populationSize: populationSize,
+    avoidDuplicates: true
   };
 
   strategyPool['pool'] = GeneticAlgorithmCtor(strategyPool.config);

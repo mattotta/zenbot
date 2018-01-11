@@ -9,7 +9,6 @@ module.exports = function container (get, set, clear) {
     getOptions: function (s) {
       this.option('period', 'period length, same as --period_length', String, '2m')
       this.option('period_length', 'period length, same as --period', String, '2m')
-      this.option('min_periods', 'min. number of history periods', Number, 52)
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
       this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float', Number, 0)
