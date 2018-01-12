@@ -17,8 +17,6 @@ module.exports = function container (get, set, clear) {
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
       this.option('ema_source', 'buy when RSI reaches this value', String, 'close')
       this.option('reversed', 'act reversed on trend', Number, 0)
-      
-      s.options.order_type = s.options.reversed ? 'taker' : 'maker'
     },
 
     calculate: function (s) {
@@ -75,12 +73,14 @@ module.exports = function container (get, set, clear) {
           s.trend = 'oversold'
           s.signal = 'buy'
           s.cancel_down = true
+          s.options.order_type = 'maker'
           return cb()
         } else if (s.overbought) {
           s.overbought = false
           s.trend = 'overbought'
           s.signal = 'sell'
           s.cancel_up = true
+          s.options.order_type = 'maker'
           return cb()
         }
       }
@@ -107,6 +107,7 @@ module.exports = function container (get, set, clear) {
           s.cancel_up = false
         }
       }
+      s.options.order_type = s.options.reversed ? 'taker' : 'maker'
       cb()
     },
 
