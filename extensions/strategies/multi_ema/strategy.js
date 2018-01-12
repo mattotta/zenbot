@@ -20,6 +20,9 @@ module.exports = function container (get, set, clear) {
       this.option('order_type_weak', 'order type for orders based on weak signal', String)
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
+      this.option('rsi_periods', 'number of periods for RSI', Number, 14)
+      this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
+      this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
 
       // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
       if (s.options.ema_type_weak === 'ta_ema') {
@@ -59,6 +62,17 @@ module.exports = function container (get, set, clear) {
     },
 
     calculateTrend: function(s) {
+      if (s.options.rsi_periods) {
+        get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
+        if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold && !s.cancel_down) {
+          s.oversold = true
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
+        } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought && !s.cancel_up) {
+          s.overbought = true
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
+        }
+      }
+
       s.strategy.calculateEma(s, 'weak')
       s.strategy.calculateEma(s, 'strong')
 
@@ -123,11 +137,33 @@ module.exports = function container (get, set, clear) {
     onPeriod: function (s, cb) {
       s.strategy.calculateTrend(s)
 
+      if (!s.in_preroll && (typeof s.period.oversold_rsi === 'number' || typeof s.period.overbought_rsi === 'number')) {
+        if (s.oversold) {
+          s.oversold = false
+          s.trend = 'oversold'
+          s.signal = 'buy'
+          s.cancel_down = true
+          return cb()
+        } else if (s.overbought) {
+          s.overbought = false
+          s.trend = 'overbought'
+          s.signal = 'sell'
+          s.cancel_up = true
+          return cb()
+        }
+      }
+
       let signal = s.strategy.getSignal(s, true)
 
       if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
         // avoid multiple buy signals
         signal = null
+      }
+
+      if (signal) {
+        // reset rsi-signal
+        s.cancel_down = false
+        s.cancel_up = false
       }
         
       s.signal = signal
@@ -139,7 +175,6 @@ module.exports = function container (get, set, clear) {
 
       if ((typeof s.period.trend_ema_rate_weak === 'number' && typeof s.period.trend_ema_stddev_weak === 'number') ||
         (typeof s.period.trend_ema_rate_strong === 'number' && typeof s.period.trend_ema_stddev_strong === 'number')) {
-        let signal = s.strategy.getSignal(s, false)
         let sign = '  |  '
         let color_weak = 'grey'
         let color_strong = 'grey'

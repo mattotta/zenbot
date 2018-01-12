@@ -12,8 +12,9 @@ module.exports = function container (get, set, clear) {
       this.option('trend_ema', 'number of periods for trend EMA', Number, 26)
       this.option('neutral_rate', 'avoid trades if abs(trend_ema) under this float (0 to disable, "auto" for a variable filter)', Number, 'auto')
       this.option('neutral_rate_min', 'avoid trades if neutral_rate under this float', Number, 0)
-      this.option('oversold_rsi_periods', 'number of periods for oversold RSI', Number, 14)
+      this.option('rsi_periods', 'number of periods for RSI', Number, 14)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
+      this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
       this.option('ema_source', 'buy when RSI reaches this value', String, 'close')
       this.option('reversed', 'act reversed on trend', Number, 0)
       
@@ -28,13 +29,14 @@ module.exports = function container (get, set, clear) {
 
     calculateTrend: function (s) {
       get('lib.ema')(s, 'trend_ema', s.options.trend_ema, s.options.ema_source)
-      if (s.options.oversold_rsi) {
-        // sync RSI display with oversold RSI periods
-        s.options.rsi_periods = s.options.oversold_rsi_periods
-        get('lib.rsi')(s, 'oversold_rsi', s.options.oversold_rsi_periods)
-        if (!s.in_preroll && s.period.oversold_rsi <= s.options.oversold_rsi && !s.oversold && !s.cancel_down) {
+      if (s.options.rsi_periods) {
+        get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
+        if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold && !s.cancel_down) {
           s.oversold = true
-          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.oversold_rsi + ' RSI, preparing to buy\n').cyan)
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
+        } else if (!s.in_preroll && s.period.rsi <= s.options.overbought_rsi && !s.overbought && !s.cancel_up) {
+          s.overbought = true
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
         }
       }
       if (s.period.trend_ema && s.lookback[0] && s.lookback[0].trend_ema) {
@@ -67,21 +69,28 @@ module.exports = function container (get, set, clear) {
     onPeriod: function (s, cb) {
       s.strategy.calculateTrend(s)
 
-      if (!s.in_preroll && typeof s.period.oversold_rsi === 'number') {
+      if (!s.in_preroll && (typeof s.period.oversold_rsi === 'number' || typeof s.period.overbought_rsi === 'number')) {
         if (s.oversold) {
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
           s.cancel_down = true
           return cb()
+        } else if (s.overbought) {
+          s.overbought = false
+          s.trend = 'overbought'
+          s.signal = 'sell'
+          s.cancel_up = true
+          return cb()
         }
       }
+
       if (typeof s.period.trend_ema_stddev === 'number') {
         let ema = s.period.trend_ema_stddev
         if (s.options.neutral_rate_min) {
           ema = Math.max(ema, s.options.neutral_rate_min)
         }
-        if (s.period.trend_ema_rate > ema) {
+        if (!s.cancel_up && s.period.trend_ema_rate > ema) {
           if (s.trend !== 'up') {
             s.acted_on_trend = false
           }
@@ -95,6 +104,7 @@ module.exports = function container (get, set, clear) {
           }
           s.trend = 'down'
           s.signal = !s.acted_on_trend ? (s.options.reversed ? 'buy' : 'sell') : null
+          s.cancel_up = false
         }
       }
       cb()
