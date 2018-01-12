@@ -638,6 +638,9 @@ selectedStrategies.forEach(function(v) {
   }
 
   strategyPool['config'] = {
+    createFunction: function() {
+      return Phenotypes.create(strategies[v]);
+    },
     mutationFunction: function(phenotype) {
       return Phenotypes.mutation(phenotype, strategies[v]);
     },
@@ -648,6 +651,7 @@ selectedStrategies.forEach(function(v) {
     competeFunction: Phenotypes.competition,
     population: population,
     populationSize: populationSize,
+    populationSurvive: 0.5,
     avoidDuplicates: true
   };
 
