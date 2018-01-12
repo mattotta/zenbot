@@ -37,6 +37,7 @@ module.exports = function container (get, set, clear) {
       .option('--max_slippage_pct <pct>', 'avoid selling at a slippage pct above this float', c.max_slippage_pct)
       .option('--symmetrical', 'reverse time at the end of the graph, normalizing buy/hold to 0', c.symmetrical)
       .option('--rsi_periods <periods>', 'number of periods to calculate RSI at', Number, c.rsi_periods)
+      .option('--keep_lookback_periods <amount>', 'Keep this many lookback periods max. ', Number, c.keep_lookback_periods)
       .option('--disable_options', 'disable printing of options')
       .option('--enable_stats', 'enable printing order stats')
       .option('--verbose', 'print status lines on every period')

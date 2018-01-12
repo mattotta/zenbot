@@ -43,6 +43,7 @@ module.exports = function container (get, set, clear) {
       .option('--max_slippage_pct <pct>', 'avoid selling at a slippage pct above this float', c.max_slippage_pct)
       .option('--rsi_periods <periods>', 'number of periods to calculate RSI at', Number, c.rsi_periods)
       .option('--poll_trades <ms>', 'poll new trades at this interval in ms', Number, c.poll_trades)
+      .option('--keep_lookback_periods <amount>', 'Keep this many lookback periods max. ', Number, c.keep_lookback_periods)
       .option('--disable_stats', 'disable printing order stats')
       .option('--reset_profit', 'start new profit calculation from 0')
       .option('--debug', 'output detailed debug info')
@@ -72,8 +73,7 @@ module.exports = function container (get, set, clear) {
         s.exchange = require(`../extensions/exchanges/${so.selector.exchange_id}/exchange`)(conf)
         if (!s.exchange) {
           console.error('cannot trade ' + so.selector.normalized + ': exchange not implemented')
-          process.exit(1)
-        
+          process.exit(1)        
         }
         var engine = get('lib.engine')(s)
 
