@@ -52,7 +52,7 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
     cci_srsi: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --min_periods=${phenotype.min_periods} --cci_periods=${phenotype.rsi_periods} --rsi_periods=${phenotype.srsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --oversold_cci=${phenotype.oversold_cci} --overbought_cci=${phenotype.overbought_cci} --constant=${phenotype.constant} --reversed=${phenotype.reversed} --ema_acc=${phenotype.ema_acc}`,
     srsi_macd: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --rsi_periods=${phenotype.rsi_periods} --srsi_periods=${phenotype.srsi_periods} --srsi_k=${phenotype.srsi_k} --srsi_d=${phenotype.srsi_d} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold}`,
     macd: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --ema_short_period=${phenotype.ema_short_period} --ema_long_period=${phenotype.ema_long_period} --signal_period=${phenotype.signal_period} --up_trend_threshold=${phenotype.up_trend_threshold} --down_trend_threshold=${phenotype.down_trend_threshold} --overbought_rsi_periods=${phenotype.overbought_rsi_periods} --overbought_rsi=${phenotype.overbought_rsi}`,
-    multi_ema: `--ema_periods_weak=${phenotype.ema_periods_weak} --ema_periods_strong=${phenotype.ema_periods_strong} --neutral_rate_weak=${phenotype.neutral_rate_weak} --neutral_rate_strong=${phenotype.neutral_rate_strong} --neutral_rate_min_weak=${phenotype.neutral_rate_min_weak} --neutral_rate_min_strong=${phenotype.neutral_rate_min_strong} --decision=${phenotype.decision} --order_type_weak=maker --order_type_strong=taker --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --rsi_periods=${phenotype.rsi_periods}`,
+    multi_ema: `--ema_periods_weak_down=${phenotype.ema_periods_weak_down} --ema_periods_weak_up=${phenotype.ema_periods_weak_up} --ema_periods_strong_down=${phenotype.ema_periods_strong_down} --ema_periods_strong_up=${phenotype.ema_periods_strong_up} --neutral_rate_weak_down=${phenotype.neutral_rate_weak_down} --neutral_rate_weak_up=${phenotype.neutral_rate_weak_up} --neutral_rate_strong_down=${phenotype.neutral_rate_strong_down} --neutral_rate_strong_up=${phenotype.neutral_rate_strong_up} --neutral_rate_min_weak_down=${phenotype.neutral_rate_min_weak_down} --neutral_rate_min_weak_up=${phenotype.neutral_rate_min_weak_up} --neutral_rate_min_strong_down=${phenotype.neutral_rate_min_strong_down} --neutral_rate_min_strong_up=${phenotype.neutral_rate_min_strong_up} --decision=${phenotype.decision} --order_type_weak=maker --order_type_strong=taker --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --rsi_periods=${phenotype.rsi_periods}`,
     neural: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --activation_1_type=${phenotype.activation_1_type} --neurons_1=${phenotype.neurons_1} --depth=${phenotype.depth} --momentum=${phenotype.momentum} --decay=${phenotype.decay} --min_predict=${phenotype.min_predict} --learns=${phenotype.learns}`,
     rsi: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --rsi_periods=${phenotype.rsi_periods} --oversold_rsi=${phenotype.oversold_rsi} --overbought_rsi=${phenotype.overbought_rsi} --rsi_recover=${phenotype.rsi_recover} --rsi_drop=${phenotype.rsi_drop} --rsi_divisor=${phenotype.rsi_divisor}`,
     sar: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --sar_af=${phenotype.sar_af} --sar_max_af=${phenotype.sar_max_af}`,
@@ -117,7 +117,7 @@ let processOutput = output => {
   let feeRegexp = /fees: (\d+\.\d+)/g;
 
   let strippedOutput = StripAnsi(output);
-  let output2 = strippedOutput.substr(strippedOutput.length - 3500);
+  let output2 = strippedOutput.substr(strippedOutput.length - 4000);
 
   let rawParams = jsonRegexp.exec(output2)[1];
   let params = JSON.parse(rawParams);
@@ -132,8 +132,6 @@ let processOutput = output => {
   let errorRate     = errMatch !== null ? parseInt(errMatch[1]) : 0;
   let fees          = feeMatch !== null ? feeMatch[1] : 0;
   let days = parseInt(params.days);
-  let start = parseInt(params.start);
-  let end = parseInt(params.end);
 
   let roi = roundp(
     ((endBalance - params.currency_capital) / params.currency_capital) * 100,
@@ -350,12 +348,18 @@ let strategies = {
     profit_stop_pct: Range(0, 0),
 
     // -- strategy
-    ema_periods_weak: Range(TREND_EMA_MIN, TREND_EMA_MAX),
-    ema_periods_strong: Range(TREND_EMA_MIN, TREND_EMA_MAX),
-    neutral_rate_weak: RangeItems(['auto', 'auto_trend', 'auto_new']),
-    neutral_rate_strong: RangeItems(['auto', 'auto_trend', 'auto_new']),
-    neutral_rate_min_weak: RangeFloat(0, 1),
-    neutral_rate_min_strong: RangeFloat(0, 1),
+    ema_periods_weak_down: Range(TREND_EMA_MIN, TREND_EMA_MAX),
+    ema_periods_weak_up: Range(TREND_EMA_MIN, TREND_EMA_MAX),
+    ema_periods_strong_down: Range(TREND_EMA_MIN, TREND_EMA_MAX),
+    ema_periods_strong_up: Range(TREND_EMA_MIN, TREND_EMA_MAX),
+    neutral_rate_weak_down: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
+    neutral_rate_weak_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
+    neutral_rate_strong_down: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
+    neutral_rate_strong_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
+    neutral_rate_min_weak_down: RangeFloat(0, 1),
+    neutral_rate_min_weak_up: RangeFloat(0, 1),
+    neutral_rate_min_strong_down: RangeFloat(0, 1),
+    neutral_rate_min_strong_up: RangeFloat(0, 1),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
     rsi_periods: Range(RSI_PERIODS_MIN, RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),

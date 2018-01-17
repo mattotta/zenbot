@@ -9,14 +9,22 @@ module.exports = function container (get, set, clear) {
     getOptions: function (s) {
       this.option('period', 'period length, same as --period_length', String, '2m')
       this.option('period_length', 'period length, same as --period', String, '2m')
-      this.option('ema_type_weak', 'type of calculation method for weak trend EMA', String, 'ema')
-      this.option('ema_type_strong', 'type of calculation method for strong trend EMA', String, 'ema')
-      this.option('ema_periods_weak', 'number of periods for weak trend EMA', Number, 26)
-      this.option('ema_periods_strong', 'number of periods for strong trend EMA', Number, 26)
-      this.option('neutral_rate_weak', 'avoid trades if abs(trend_ema_weak) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
-      this.option('neutral_rate_strong', 'avoid trades if abs(trend_ema_strong) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
-      this.option('neutral_rate_min_weak', 'avoid trades if neutral_rate_weak under this float', Number, 0)
-      this.option('neutral_rate_min_strong', 'avoid trades if neutral_rate_strong under this float', Number, 0)
+      this.option('ema_type_weak_down', 'type of calculation method for weak down trend EMA', String, 'ema')
+      this.option('ema_type_weak_up', 'type of calculation method for weak up trend EMA', String, 'ema')
+      this.option('ema_type_strong_down', 'type of calculation method for strong down trend EMA', String, 'ema')
+      this.option('ema_type_strong_up', 'type of calculation method for strong up trend EMA', String, 'ema')
+      this.option('ema_periods_weak_down', 'number of periods for weak down trend EMA', Number, 26)
+      this.option('ema_periods_weak_up', 'number of periods for weak up trend EMA', Number, 26)
+      this.option('ema_periods_strong_down', 'number of periods for strong down trend EMA', Number, 26)
+      this.option('ema_periods_strong_up', 'number of periods for strong up trend EMA', Number, 26)
+      this.option('neutral_rate_weak_down', 'avoid trades if abs(trend_ema_weak_down) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
+      this.option('neutral_rate_weak_up', 'avoid trades if abs(trend_ema_weak_up) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
+      this.option('neutral_rate_strong_down', 'avoid trades if abs(trend_ema_strong_down) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
+      this.option('neutral_rate_strong_up', 'avoid trades if abs(trend_ema_strong_up) under this float (0 to disable, "auto" for a variable filter)', String, 'auto')
+      this.option('neutral_rate_min_weak_down', 'avoid trades if neutral_rate_weak_down under this float', Number, 0)
+      this.option('neutral_rate_min_weak_up', 'avoid trades if neutral_rate_weak_up under this float', Number, 0)
+      this.option('neutral_rate_min_strong_down', 'avoid trades if neutral_rate_strong_down under this float', Number, 0)
+      this.option('neutral_rate_min_strong_up', 'avoid trades if neutral_rate_strong_up under this float', Number, 0)
       this.option('order_type_weak', 'order type for orders based on weak signal', String)
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
@@ -25,25 +33,17 @@ module.exports = function container (get, set, clear) {
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
 
       // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
-      if (s.options.ema_type_weak === 'ta_ema') {
-        s.options.ema_periods_weak = Math.max(s.options.ema_periods_weak, 2)
+      if (s.options.ema_type_weak_down === 'ta_ema') {
+        s.options.ema_periods_weak_down = Math.max(s.options.ema_periods_weak_down, 2)
       }
-      if (s.options.ema_type_strong === 'ta_ema') {
-        s.options.ema_periods_strong = Math.max(s.options.ema_periods_strong, 2)
+      if (s.options.ema_type_weak_up === 'ta_ema') {
+        s.options.ema_periods_weak_up = Math.max(s.options.ema_periods_weak_up, 2)
       }
-
-      // optimize periods parameter
-      if (s.options.ema_periods_weak < s.options.ema_periods_strong) {
-        let ema_periods_strong = s.options.ema_periods_weak
-        s.options.ema_periods_weak = s.options.ema_periods_strong
-        s.options.ema_periods_strong = ema_periods_strong
+      if (s.options.ema_type_strong_down === 'ta_ema') {
+        s.options.ema_periods_strong_down = Math.max(s.options.ema_periods_strong_down, 2)
       }
-
-      // optimize neutral rate parameter
-      if (s.options.neutral_rate_min_weak > s.options.neutral_rate_min_strong) {
-        let neutral_rate_min_strong = s.options.neutral_rate_min_weak
-        s.options.neutral_rate_min_weak = s.options.neutral_rate_min_strong
-        s.options.neutral_rate_min_strong = neutral_rate_min_strong
+      if (s.options.ema_type_strong_up === 'ta_ema') {
+        s.options.ema_periods_strong_up = Math.max(s.options.ema_periods_strong_up, 2)
       }
 
       // get order type
@@ -73,27 +73,34 @@ module.exports = function container (get, set, clear) {
         }
       }
 
-      s.strategy.calculateEma(s, 'weak')
-      s.strategy.calculateEma(s, 'strong')
+      s.strategy.calculateEma(s, 'weak_down')
+      s.strategy.calculateEma(s, 'weak_up')
+      s.strategy.calculateEma(s, 'strong_down')
+      s.strategy.calculateEma(s, 'strong_up')
 
       s.period.trend = null
 
-      if ((typeof s.period.trend_ema_stddev_weak === 'number') && (typeof s.period.trend_ema_stddev_strong === 'number')) {
+      if ((typeof s.period.trend_ema_stddev_weak_down === 'number') &&
+        (typeof s.period.trend_ema_stddev_weak_up === 'number') &&
+        (typeof s.period.trend_ema_stddev_strong_down === 'number') &&
+        (typeof s.period.trend_ema_stddev_strong_up === 'number')) {
 
-        let ema_weak = Math.max(s.period.trend_ema_stddev_weak, s.options.neutral_rate_min_weak)
-        let ema_strong = Math.max(s.period.trend_ema_stddev_strong, s.options.neutral_rate_min_strong)
+        let ema_weak_down = Math.max(s.period.trend_ema_stddev_weak_down, s.options.neutral_rate_min_weak_down)
+        let ema_weak_up = Math.max(s.period.trend_ema_stddev_weak_up, s.options.neutral_rate_min_weak_up)
+        let ema_strong_down = Math.max(s.period.trend_ema_stddev_strong_down, s.options.neutral_rate_min_strong_down)
+        let ema_strong_up = Math.max(s.period.trend_ema_stddev_strong_up, s.options.neutral_rate_min_strong_up)
 
-        if (s.period.trend_ema_rate_strong >= ema_strong) {
-          s.period.trend = 'up_strong'
-        }
-        else if (s.period.trend_ema_rate_strong <= (ema_strong * -1)) {
+        if (s.period.trend_ema_rate_strong_down <= (ema_strong_down * -1)) {
           s.period.trend = 'down_strong'
         }
-        else if (s.period.trend_ema_rate_weak >= ema_weak) {
-          s.period.trend = 'up_weak'
+        else if (s.period.trend_ema_rate_strong_up >= ema_strong_up) {
+          s.period.trend = 'up_strong'
         }
-        else if (s.period.trend_ema_rate_weak <= (ema_weak * -1)) {
+        else if (s.period.trend_ema_rate_weak_down <= (ema_weak_down * -1)) {
           s.period.trend = 'down_weak'
+        }
+        else if (s.period.trend_ema_rate_weak_up >= ema_weak_up) {
+          s.period.trend = 'up_weak'
         }
       }
     },
@@ -175,45 +182,52 @@ module.exports = function container (get, set, clear) {
     onReport: function (s) {
       let cols = []
 
-      if ((typeof s.period.trend_ema_rate_weak === 'number' && typeof s.period.trend_ema_stddev_weak === 'number') ||
-        (typeof s.period.trend_ema_rate_strong === 'number' && typeof s.period.trend_ema_stddev_strong === 'number')) {
-        let sign = '  |  '
-        let color_weak = 'grey'
-        let color_strong = 'grey'
-        let color_sign= 'grey'
-        if (s.period.trend === 'down_strong') {
-          sign = '<<|  '
-          color_sign = 'red'
-          color_strong = 'red'
-        } else if (s.period.trend === 'down_weak') {
-          sign = ' <|  '
-          color_sign = 'red'
-          color_weak = 'red'
-        } else if (s.period.trend === 'up_weak') {
-          sign = '  |> '
-          color_sign = 'green'
-          color_weak = 'green'
-        } else if (s.period.trend === 'up_strong') {
-          sign = '  |>>'
-          color_sign = 'green'
-          color_strong = 'green'
-        }
-        if (typeof s.period.trend_ema_rate_weak === 'number' && typeof s.period.trend_ema_stddev_weak === 'number') {
-          cols.push(z(8, n(s.period.trend_ema_rate_weak).format('0.0000'), ' ')[color_weak])
-          cols.push(z(8, n(s.period.trend_ema_stddev_weak).format('0.0000'), ' ').grey)
-        } else  {
-          cols.push('                  ')
-        }
-        if (typeof s.period.trend_ema_rate_strong === 'number' && typeof s.period.trend_ema_stddev_strong === 'number') {
-          cols.push(z(8, n(s.period.trend_ema_rate_strong).format('0.0000'), ' ')[color_strong])
-          cols.push(z(8, n(s.period.trend_ema_stddev_strong).format('0.0000'), ' ').grey)
-        } else {
-          cols.push('                  ')
-        }
-        cols.push(z(7, sign, ' ')[color_sign])
-      } else {
-        cols.push('                                           ')
+      let sign = '  |  '
+      let color_weak = 'grey'
+      let color_strong = 'grey'
+      let color_sign= 'grey'
+      if (s.period.trend === 'down_strong') {
+        sign = '<<|  '
+        color_sign = 'red'
+        color_strong = 'red'
+      } else if (s.period.trend === 'down_weak') {
+        sign = ' <|  '
+        color_sign = 'red'
+        color_weak = 'red'
+      } else if (s.period.trend === 'up_weak') {
+        sign = '  |> '
+        color_sign = 'green'
+        color_weak = 'green'
+      } else if (s.period.trend === 'up_strong') {
+        sign = '  |>>'
+        color_sign = 'green'
+        color_strong = 'green'
       }
+      if (typeof s.period.trend_ema_rate_weak_down === 'number' && typeof s.period.trend_ema_stddev_weak_down === 'number') {
+        cols.push(z(8, n(s.period.trend_ema_rate_weak_down).format('0.0000'), ' ')[color_weak])
+        cols.push(z(8, n(s.period.trend_ema_stddev_weak_down).format('0.0000'), ' ').grey)
+      } else  {
+        cols.push('                  ')
+      }
+      if (typeof s.period.trend_ema_rate_weak_up === 'number' && typeof s.period.trend_ema_stddev_weak_up === 'number') {
+        cols.push(z(8, n(s.period.trend_ema_rate_weak_up).format('0.0000'), ' ')[color_weak])
+        cols.push(z(8, n(s.period.trend_ema_stddev_weak_up).format('0.0000'), ' ').grey)
+      } else  {
+        cols.push('                  ')
+      }
+      if (typeof s.period.trend_ema_rate_strong_down === 'number' && typeof s.period.trend_ema_stddev_strong_down === 'number') {
+        cols.push(z(8, n(s.period.trend_ema_rate_strong_down).format('0.0000'), ' ')[color_strong])
+        cols.push(z(8, n(s.period.trend_ema_stddev_strong_down).format('0.0000'), ' ').grey)
+      } else {
+        cols.push('                  ')
+      }
+      if (typeof s.period.trend_ema_rate_strong_up === 'number' && typeof s.period.trend_ema_stddev_strong_up === 'number') {
+        cols.push(z(8, n(s.period.trend_ema_rate_strong_up).format('0.0000'), ' ')[color_strong])
+        cols.push(z(8, n(s.period.trend_ema_stddev_strong_up).format('0.0000'), ' ').grey)
+      } else {
+        cols.push('                  ')
+      }
+      cols.push(z(7, sign, ' ')[color_sign])
 
       return cols
     },
