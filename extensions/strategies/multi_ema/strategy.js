@@ -192,46 +192,48 @@ module.exports = function container (get, set, clear) {
       let cols = []
 
       let sign = '  |  '
-      let color_weak = 'grey'
-      let color_strong = 'grey'
+      let color_weak_down = 'grey'
+      let color_weak_up = 'grey'
+      let color_strong_down = 'grey'
+      let color_strong_up = 'grey'
       let color_sign= 'grey'
       if (s.period.trend === 'down_strong') {
         sign = '<<|  '
         color_sign = 'red'
-        color_strong = 'red'
+        color_strong_down = 'red'
       } else if (s.period.trend === 'down_weak') {
         sign = ' <|  '
         color_sign = 'red'
-        color_weak = 'red'
+        color_weak_down = 'red'
       } else if (s.period.trend === 'up_weak') {
         sign = '  |> '
         color_sign = 'green'
-        color_weak = 'green'
+        color_weak_up = 'green'
       } else if (s.period.trend === 'up_strong') {
         sign = '  |>>'
         color_sign = 'green'
-        color_strong = 'green'
+        color_strong_up = 'green'
       }
       if (typeof s.period.trend_ema_rate_weak_down === 'number' && typeof s.period.trend_ema_stddev_weak_down === 'number') {
-        cols.push(z(8, n(s.period.trend_ema_rate_weak_down).format('0.0000'), ' ')[color_weak])
+        cols.push(z(8, n(s.period.trend_ema_rate_weak_down).format('0.0000'), ' ')[color_weak_down])
         cols.push(z(8, n(s.period.trend_ema_stddev_weak_down).format('0.0000'), ' ').grey)
       } else  {
         cols.push('                  ')
       }
       if (typeof s.period.trend_ema_rate_weak_up === 'number' && typeof s.period.trend_ema_stddev_weak_up === 'number') {
-        cols.push(z(8, n(s.period.trend_ema_rate_weak_up).format('0.0000'), ' ')[color_weak])
+        cols.push(z(8, n(s.period.trend_ema_rate_weak_up).format('0.0000'), ' ')[color_weak_up])
         cols.push(z(8, n(s.period.trend_ema_stddev_weak_up).format('0.0000'), ' ').grey)
       } else  {
         cols.push('                  ')
       }
       if (typeof s.period.trend_ema_rate_strong_down === 'number' && typeof s.period.trend_ema_stddev_strong_down === 'number') {
-        cols.push(z(8, n(s.period.trend_ema_rate_strong_down).format('0.0000'), ' ')[color_strong])
+        cols.push(z(8, n(s.period.trend_ema_rate_strong_down).format('0.0000'), ' ')[color_strong_down])
         cols.push(z(8, n(s.period.trend_ema_stddev_strong_down).format('0.0000'), ' ').grey)
       } else {
         cols.push('                  ')
       }
       if (typeof s.period.trend_ema_rate_strong_up === 'number' && typeof s.period.trend_ema_stddev_strong_up === 'number') {
-        cols.push(z(8, n(s.period.trend_ema_rate_strong_up).format('0.0000'), ' ')[color_strong])
+        cols.push(z(8, n(s.period.trend_ema_rate_strong_up).format('0.0000'), ' ')[color_strong_up])
         cols.push(z(8, n(s.period.trend_ema_stddev_strong_up).format('0.0000'), ' ').grey)
       } else {
         cols.push('                  ')
