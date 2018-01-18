@@ -75,10 +75,10 @@ module.exports = function container (get, set, clear) {
         get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
         if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold && !s.cancel_down) {
           s.oversold = true
-          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
+          if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
         } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought && !s.cancel_up) {
           s.overbought = true
-          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
+          if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
         }
       }
 
@@ -153,7 +153,7 @@ module.exports = function container (get, set, clear) {
     onPeriod: function (s, cb) {
       s.strategy.calculateTrend(s)
 
-      if (!s.in_preroll && (typeof s.period.oversold_rsi === 'number' || typeof s.period.overbought_rsi === 'number')) {
+      if (!s.in_preroll && typeof s.period.rsi === 'number') {
         if (s.oversold) {
           s.oversold = false
           s.trend = 'oversold'
