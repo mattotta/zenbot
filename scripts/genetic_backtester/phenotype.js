@@ -4,6 +4,8 @@
  * 07/01/2017
  */
 
+let roundp = require('round-precision');
+
 let PROPERTY_MUTATION_CHANCE = 0.30;
 let PROPERTY_CROSSOVER_CHANCE = 0.50;
 
@@ -25,6 +27,7 @@ module.exports = {
         else r[k] = Math.round(Math.random() * (v.max - v.min + 1)/v.factor)*v.factor;
       } else if (v.type === 'float') {
         r[k] = (Math.random() * (v.max - v.min)) + v.min;
+        if (v.precision) r[k] = roundp(r[k], v.precision);
       } else if (v.type === 'makertaker') {
         r[k] = (Math.random() > 0.5) ? 'maker' : 'taker';
       } else if (v.type === 'period_length' || v.type === 'period') {

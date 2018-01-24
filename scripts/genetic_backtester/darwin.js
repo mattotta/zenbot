@@ -205,11 +205,12 @@ let RangeFactor = (min, max, factor) => {
   return r;
 };
 
-let RangeFloat = (min, max) => {
+let RangeFloat = (min, max, precision = 0) => {
   let r = {
     type: 'float',
     min: min,
-    max: max
+    max: max,
+    precision: precision
   };
   return r;
 };
@@ -356,10 +357,10 @@ let strategies = {
     neutral_rate_weak_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong_down: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
-    neutral_rate_min_weak_down: RangeFloat(0, 1),
-    neutral_rate_min_weak_up: RangeFloat(0, 1),
-    neutral_rate_min_strong_down: RangeFloat(0, 1),
-    neutral_rate_min_strong_up: RangeFloat(0, 1),
+    neutral_rate_min_weak_down: RangeFloat(0, 1, 4),
+    neutral_rate_min_weak_up: RangeFloat(0, 1, 4),
+    neutral_rate_min_strong_down: RangeFloat(0, 1, 4),
+    neutral_rate_min_strong_up: RangeFloat(0, 1, 4),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
     rsi_periods: Range(RSI_PERIODS_MIN, RSI_PERIODS_MAX),
     oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
