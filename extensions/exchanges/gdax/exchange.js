@@ -51,7 +51,7 @@ module.exports = function container (get, set, clear) {
 
   var websocket_subscribed = false
 
-  var websocket_quote = {bid: 0, ask: 0}
+  var websocket_quotes = []
 
   var websocket_trades = []
 
@@ -83,8 +83,9 @@ module.exports = function container (get, set, clear) {
       })
       websocket_client.on('message', function (message) {
         if (message.type == 'ticker') {
-          websocket_quote.bid = message.best_bid
-          websocket_quote.ask = message.best_ask
+          websocket_quotes[message.product_id].bid = message.best_bid
+          websocket_quotes[message.product_id].ask = message.best_ask
+          websocket_quotes[message.product_id].price = message.price
         } else if (message.type == 'match') {
           var max_length = (c.gdax.websocket.trade_history || 1000)
           if (websocket_trades.length > max_length ) {
@@ -203,8 +204,7 @@ module.exports = function container (get, set, clear) {
       client.getAccounts(function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getBalance', func_args, err)
-        var balance = {asset: 0, currency: 0}
-        var split = 1
+        var balance = {asset: 0, asset_hold: 0, currency: 0, currency_hold: 0}
         body.forEach(function (account) {
           if (account.currency === opts.currency) {
             balance.currency = account.balance
@@ -214,23 +214,36 @@ module.exports = function container (get, set, clear) {
             balance.asset = account.balance
             balance.asset_hold = account.hold
           }
-          else if (c.gdax.balance.split && c.gdax.balance.assets[account.currency] && c.gdax.balance.assets[account.currency] > account.balance) {
-            split++
-          }
         })
-        if (c.gdax.balance.split && c.gdax.balance.assets[opts.asset] && c.gdax.balance.assets[opts.asset] < balance.asset) {
-          balance.currency = 0
+        if (!c.gdax.balance.split) {
+          cb(null, balance)
+        } else {
+          let balances = []
+          body.forEach(function (account) {
+            if (c.gdax.balance.assets[account.currency]) {
+              this.getQuote({product_id: account.currency + '-' + opts.currency}, function(err, quote) {
+                balances[account.currency] = n(account.balance).add(account.hold).multiply(quote.price)
+                if (balances.length === c.gdax.balance.assets.length) {
+                  let total = n(balance.currency).add(balance.currency_hold).value()
+                  balances.forEach(function(value) {
+                    total = n(total).add(value).value()
+                  })
+                  balance.currency = Math.max(0, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value())
+                  cb(null, balance)
+                }
+              })
+            }
+          })
         }
-        else {
-          balance.currency = balance.currency /split
-        }
-        cb(null, balance)
       })
     },
 
     getQuote: function (opts, cb) {
-      if (websocketClient([opts.product_id]) && websocket_quote.bid && websocket_quote.ask) {
-        cb(null, websocket_quote)
+      if (websocketClient([opts.product_id]) &&
+        websocket_quotes[opts.product_id] &&
+        websocket_quotes[opts.product_id].bid &&
+        websocket_quotes[opts.product_id].ask) {
+        cb(null, websocket_quotes[opts.product_id])
         return
       }
       var func_args = [].slice.call(arguments)
@@ -239,7 +252,7 @@ module.exports = function container (get, set, clear) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getQuote', func_args, err)
         if (body.bid || body.ask)
-          cb(null, {bid: body.bid, ask: body.ask})
+          cb(null, {bid: body.bid, ask: body.ask, price: body.price})
         else
           cb(new Error(opts.product_id + ' has no liquidity to quote'))
       })
@@ -269,6 +282,11 @@ module.exports = function container (get, set, clear) {
         delete opts.post_only
         delete opts.cancel_after
         opts.type = 'market'
+      }
+      else if (opts.order_type === 'stop') {
+        delete opts.post_only
+        delete opts.cancel_after
+        opts.type = 'stop'
       }
       else {
         opts.time_in_force = 'GTT'
@@ -304,6 +322,11 @@ module.exports = function container (get, set, clear) {
         delete opts.post_only
         delete opts.cancel_after
         opts.type = 'market'
+      }
+      else if (opts.order_type === 'stop') {
+        delete opts.post_only
+        delete opts.cancel_after
+        opts.type = 'stop'
       }
       else {
         opts.time_in_force = 'GTT'
