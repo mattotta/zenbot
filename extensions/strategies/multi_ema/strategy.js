@@ -73,10 +73,10 @@ module.exports = function container (get, set, clear) {
     calculateTrend: function(s) {
       if (s.options.rsi_periods) {
         get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
-        if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold && !s.cancel_down) {
+        if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold) {
           s.oversold = true
           if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
-        } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought && !s.cancel_up) {
+        } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought) {
           s.overbought = true
           if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
         }
@@ -158,14 +158,12 @@ module.exports = function container (get, set, clear) {
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
-          s.cancel_down = true
           s.options.order_type = 'maker'
           return cb()
         } else if (s.overbought) {
           s.overbought = false
           s.trend = 'overbought'
           s.signal = 'sell'
-          s.cancel_up = true
           s.options.order_type = 'maker'
           return cb()
         }
@@ -176,12 +174,6 @@ module.exports = function container (get, set, clear) {
       if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
         // avoid multiple buy signals
         signal = null
-      }
-
-      if (signal) {
-        // reset rsi-signal
-        s.cancel_down = false
-        s.cancel_up = false
       }
         
       s.signal = signal
