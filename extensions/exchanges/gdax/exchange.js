@@ -83,9 +83,11 @@ module.exports = function container (get, set, clear) {
       })
       websocket_client.on('message', function (message) {
         if (message.type == 'ticker') {
-          websocket_quotes[message.product_id].bid = message.best_bid
-          websocket_quotes[message.product_id].ask = message.best_ask
-          websocket_quotes[message.product_id].price = message.price
+          websocket_quotes[message.product_id] = {
+            bid: message.best_bid,
+            ask: message.best_ask,
+            price: message.price
+          }
         } else if (message.type == 'match') {
           var max_length = (c.gdax.websocket.trade_history || 1000)
           if (websocket_trades.length > max_length ) {
@@ -200,6 +202,7 @@ module.exports = function container (get, set, clear) {
 
     getBalance: function (opts, cb) {
       var func_args = [].slice.call(arguments)
+      var self = this
       var client = authedClient()
       client.getAccounts(function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
@@ -218,16 +221,19 @@ module.exports = function container (get, set, clear) {
         if (!c.gdax.balance.split) {
           cb(null, balance)
         } else {
-          let balances = []
+          let balances = { count: 0 }
           body.forEach(function (account) {
-            if (c.gdax.balance.assets[account.currency]) {
-              this.getQuote({product_id: account.currency + '-' + opts.currency}, function(err, quote) {
-                balances[account.currency] = n(account.balance).add(account.hold).multiply(quote.price)
-                if (balances.length === c.gdax.balance.assets.length) {
+            if (c.gdax.balance.assets[account.currency] > 0) {
+              self.getQuote({product_id: account.currency + '-' + opts.currency, rest: true}, function(err, quote) {
+                balances[account.currency] = n(account.balance).add(account.hold).multiply(quote.price).value()
+                balances.count++
+                if (balances.count === c.gdax.balance.assets.count) {
                   let total = n(balance.currency).add(balance.currency_hold).value()
-                  balances.forEach(function(value) {
-                    total = n(total).add(value).value()
-                  })
+                  for (let property in balances) {
+                    if (property !== 'count' && balances.hasOwnProperty(property)) {
+                      total = n(total).add(balances[property]).value()
+                    }
+                  }
                   balance.currency = Math.max(0, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value())
                   cb(null, balance)
                 }
@@ -239,7 +245,8 @@ module.exports = function container (get, set, clear) {
     },
 
     getQuote: function (opts, cb) {
-      if (websocketClient([opts.product_id]) &&
+      if (!opts.rest &&
+        websocketClient([opts.product_id]) &&
         websocket_quotes[opts.product_id] &&
         websocket_quotes[opts.product_id].bid &&
         websocket_quotes[opts.product_id].ask) {
