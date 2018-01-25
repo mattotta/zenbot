@@ -75,10 +75,10 @@ module.exports = function container (get, set, clear) {
         get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
         if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold) {
           s.oversold = true
-          if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
         } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought) {
           s.overbought = true
-          if (s.options.mode !== 'sim' || !s.options.silent) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
         }
       }
 
