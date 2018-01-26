@@ -233,11 +233,11 @@ module.exports = function container (get, set, clear) {
           cb(null, balance)
         } else {
           let balances = { count: 0 }
-          let calculateBalance = function(asset, free, hold, price) {
-            balances[asset] = n(free).add(hold).multiply(price).value()
+          let calculateBalance = function(_asset, _balance, _price) {
+            balances[_asset] = n(_balance).multiply(_price).value()
             balances.count++
             if (balances.count === c.gdax.balance.assets.count) {
-              let total = n(balance.currency).add(balance.currency_hold).value()
+              let total = n(balance.currency).value()
               for (let property in balances) {
                 if (property !== 'count' && balances.hasOwnProperty(property)) {
                   total = n(total).add(balances[property]).value()
@@ -248,12 +248,12 @@ module.exports = function container (get, set, clear) {
             }
           }
           self.getQuote({product_id: opts.asset + '-' + opts.currency}, function(err, quote) {
-            calculateBalance(opts.asset, balance.asset, balance.asset_hold, quote.price)
+            calculateBalance(opts.asset, balance.asset, quote.price)
           })
           body.forEach(function (account) {
             if (account.currency !== opts.asset && c.gdax.balance.assets.hasOwnProperty(account.currency)) {
               self.getQuote({product_id: account.currency + '-' + opts.currency}, function(err, quote) {
-                calculateBalance(account.currency, account.balance, account.hold, quote.price)
+                calculateBalance(account.currency, account.balance, quote.price)
               })
             }
           })
