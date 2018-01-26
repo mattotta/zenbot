@@ -158,13 +158,13 @@ module.exports = function container (get, set, clear) {
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
-          s.options.order_type = 'maker'
+          s.options.order_type = 'taker'
           return cb()
         } else if (s.overbought) {
           s.overbought = false
           s.trend = 'overbought'
           s.signal = 'sell'
-          s.options.order_type = 'maker'
+          s.options.order_type = 'taker'
           return cb()
         }
       }
