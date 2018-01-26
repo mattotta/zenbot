@@ -65,7 +65,7 @@ module.exports = function container (get, set, clear) {
       let channels = ['ticker', 'matches']
       if (c.gdax.balance.split) {
         let product_ids = []
-        let currency = product_ids.split('-').pop()
+        let currency = product_id.split('-').pop()
         for (let property in c.gdax.balance.assets) {
           if (property !== 'count' && c.gdax.balance.assets.hasOwnProperty(property)) {
             product_ids.push(property + '-' + currency)
