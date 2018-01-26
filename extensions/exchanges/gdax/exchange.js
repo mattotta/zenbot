@@ -1,12 +1,12 @@
-var Gdax = require('gdax')
+let Gdax = require('gdax')
   , path = require('path')
   , colors = require('colors')
   , n = require('numbro')
 
 module.exports = function container (get, set, clear) {
-  var c = get('conf')
+  let c = get('conf')
 
-  var public_client = {}, authed_client
+  let public_client = {}, authed_client
 
   function publicClient (product_id) {
     if (!public_client[product_id]) {
@@ -27,7 +27,7 @@ module.exports = function container (get, set, clear) {
 
   function statusErr (resp, body) {
     if (resp.statusCode !== 200) {
-      var err = new Error('non-200 status: ' + resp.statusCode)
+      let err = new Error('non-200 status: ' + resp.statusCode)
       err.code = 'HTTP_STATUS'
       err.body = body
       return err
@@ -45,30 +45,41 @@ module.exports = function container (get, set, clear) {
     }, 10000)
   }
 
-  var orders = {}
+  let orders = {}
 
-  var websocket_client
+  let websocket_client
 
-  var websocket_subscribed = false
+  let websocket_subscribed = false
 
-  var websocket_quotes = []
+  let websocket_quotes = {}
 
-  var websocket_trades = []
+  let websocket_trades = []
 
-  function websocketClient (product_ids) {
+  function websocketClient(product_id) {
     if (c.gdax.websocket && c.gdax.websocket.enabled && !websocket_client) {
-      var feed = c.gdax.websocket.feed || 'wss://ws-feed.gdax.com'
-      var auth
+      let feed = c.gdax.websocket.feed || 'wss://ws-feed.gdax.com'
+      let auth
       if (c.gdax && c.gdax.key && c.gdax.key !== 'YOUR-API-KEY') {
         auth = {key: c.gdax.key, secret: c.gdax.b64secret, passphrase: c.gdax.passphrase}
       }
+      let channels = ['ticker', 'matches']
+      if (c.gdax.balance.split) {
+        let product_ids = []
+        let currency = product_ids.split('-').pop()
+        for (let property in c.gdax.balance.assets) {
+          if (property !== 'count' && c.gdax.balance.assets.hasOwnProperty(property)) {
+            product_ids.push(property + '-' + currency)
+          }
+        }
+        channels = ['matches', { name: 'ticker', product_ids: product_ids }]
+      }
       websocket_client = new Gdax.WebsocketClient(
-        product_ids,
+        [product_id],
         feed,
         auth,
         {
           heartbeat: false, 
-          channels: ['ticker', 'matches']
+          channels: channels
         }
       )
       websocket_client.on('open', function () {
@@ -89,7 +100,7 @@ module.exports = function container (get, set, clear) {
             price: message.price
           }
         } else if (message.type == 'match') {
-          var max_length = (c.gdax.websocket.trade_history || 1000)
+          let max_length = (c.gdax.websocket.trade_history || 1000)
           if (websocket_trades.length > max_length ) {
             websocket_trades.shift()
           }
@@ -106,7 +117,7 @@ module.exports = function container (get, set, clear) {
     return websocket_client
   }
 
-  var exchange = {
+  let exchange = {
     name: 'gdax',
     historyScan: 'backward',
     makerFee: 0,
@@ -117,8 +128,8 @@ module.exports = function container (get, set, clear) {
     },
 
     getTrades: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var self = this;
+      let func_args = [].slice.call(arguments)
+      let self = this;
       this.getProductTrades(opts, function (err, trades) {
         if (err) return retry('getTrades', func_args, err)
         if (trades.length) {
@@ -160,9 +171,9 @@ module.exports = function container (get, set, clear) {
     },
 
     getProductTrades: function(opts, cb) {
-      if (!opts.to && websocketClient([opts.product_id]) && websocket_subscribed) {
+      if (!opts.to && websocketClient(opts.product_id) && websocket_subscribed) {
         if (opts.from) {
-          var trades = []
+          let trades = []
           websocket_trades.forEach(function (trade)  {
             if (trade.trade_id > opts.from) {
               trades.push(trade)
@@ -173,8 +184,8 @@ module.exports = function container (get, set, clear) {
           cb(null, websocket_trades)
         }
       } else {
-        var client = publicClient(opts.product_id)
-        var args = {}
+        let client = publicClient(opts.product_id)
+        let args = {}
         if (opts.from) {
           // move cursor into the future
           args.before = opts.from
@@ -186,7 +197,7 @@ module.exports = function container (get, set, clear) {
         client.getProductTrades(args, function (err, resp, body) {
           if (!err) err = statusErr(resp, body)
           if (err) return cb(err, null)
-          var trades = body.map(function (trade) {
+          let trades = body.map(function (trade) {
             return {
               trade_id: trade.trade_id,
               time: new Date(trade.time).getTime(),
@@ -201,13 +212,13 @@ module.exports = function container (get, set, clear) {
     },
 
     getBalance: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var self = this
-      var client = authedClient()
+      let func_args = [].slice.call(arguments)
+      let self = this
+      let client = authedClient()
       client.getAccounts(function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getBalance', func_args, err)
-        var balance = {asset: 0, asset_hold: 0, currency: 0, currency_hold: 0}
+        let balance = {asset: 0, asset_hold: 0, currency: 0, currency_hold: 0}
         body.forEach(function (account) {
           if (account.currency === opts.currency) {
             balance.currency = account.balance
@@ -222,21 +233,27 @@ module.exports = function container (get, set, clear) {
           cb(null, balance)
         } else {
           let balances = { count: 0 }
-          body.forEach(function (account) {
-            if (c.gdax.balance.assets[account.currency] > 0) {
-              self.getQuote({product_id: account.currency + '-' + opts.currency, rest: true}, function(err, quote) {
-                balances[account.currency] = n(account.balance).add(account.hold).multiply(quote.price).value()
-                balances.count++
-                if (balances.count === c.gdax.balance.assets.count) {
-                  let total = n(balance.currency).add(balance.currency_hold).value()
-                  for (let property in balances) {
-                    if (property !== 'count' && balances.hasOwnProperty(property)) {
-                      total = n(total).add(balances[property]).value()
-                    }
-                  }
-                  balance.currency = Math.max(0, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value())
-                  cb(null, balance)
+          let calculateBalance = function(asset, free, hold, price) {
+            balances[asset] = n(free).add(hold).multiply(price).value()
+            balances.count++
+            if (balances.count === c.gdax.balance.assets.count) {
+              let total = n(balance.currency).add(balance.currency_hold).value()
+              for (let property in balances) {
+                if (property !== 'count' && balances.hasOwnProperty(property)) {
+                  total = n(total).add(balances[property]).value()
                 }
+              }
+              balance.currency = Math.max(0, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value())
+              cb(null, balance)
+            }
+          }
+          self.getQuote({product_id: opts.asset + '-' + opts.currency}, function(err, quote) {
+            calculateBalance(opts.asset, balance.asset, balance.asset_hold, quote.price)
+          })
+          body.forEach(function (account) {
+            if (account.currency !== opts.asset && c.gdax.balance.assets.hasOwnProperty(account.currency)) {
+              self.getQuote({product_id: account.currency + '-' + opts.currency}, function(err, quote) {
+                calculateBalance(account.currency, account.balance, account.hold, quote.price)
               })
             }
           })
@@ -245,16 +262,15 @@ module.exports = function container (get, set, clear) {
     },
 
     getQuote: function (opts, cb) {
-      if (!opts.rest &&
-        websocketClient([opts.product_id]) &&
+      if (websocketClient(opts.product_id) &&
         websocket_quotes[opts.product_id] &&
         websocket_quotes[opts.product_id].bid &&
         websocket_quotes[opts.product_id].ask) {
         cb(null, websocket_quotes[opts.product_id])
         return
       }
-      var func_args = [].slice.call(arguments)
-      var client = publicClient(opts.product_id)
+      let func_args = [].slice.call(arguments)
+      let client = publicClient(opts.product_id)
       client.getProductTicker(function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getQuote', func_args, err)
@@ -266,8 +282,8 @@ module.exports = function container (get, set, clear) {
     },
 
     cancelOrder: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var client = authedClient()
+      let func_args = [].slice.call(arguments)
+      let client = authedClient()
       client.cancelOrder(opts.order_id, function (err, resp, body) {
         if (body && (body.message === 'Order already done' || body.message === 'order not found')) return cb()
         if (!err) err = statusErr(resp, body)
@@ -277,8 +293,8 @@ module.exports = function container (get, set, clear) {
     },
 
     buy: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var client = authedClient()
+      let func_args = [].slice.call(arguments)
+      let client = authedClient()
       if (typeof opts.post_only === 'undefined') {
         opts.post_only = true
       }
@@ -305,7 +321,7 @@ module.exports = function container (get, set, clear) {
       delete opts.orig_price
       client.buy(opts, function (err, resp, body) {
         if (body && body.message === 'Insufficient funds') {
-          var order = {
+          let order = {
             status: 'rejected',
             reject_reason: 'balance'
           }
@@ -319,8 +335,8 @@ module.exports = function container (get, set, clear) {
     },
 
     sell: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var client = authedClient()
+      let func_args = [].slice.call(arguments)
+      let client = authedClient()
       if (typeof opts.post_only === 'undefined') {
         opts.post_only = true
       }
@@ -345,7 +361,7 @@ module.exports = function container (get, set, clear) {
       delete opts.orig_price
       client.sell(opts, function (err, resp, body) {
         if (body && body.message === 'Insufficient funds') {
-          var order = {
+          let order = {
             status: 'rejected',
             reject_reason: 'balance'
           }
@@ -359,8 +375,8 @@ module.exports = function container (get, set, clear) {
     },
 
     getOrder: function (opts, cb) {
-      var func_args = [].slice.call(arguments)
-      var client = authedClient()
+      let func_args = [].slice.call(arguments)
+      let client = authedClient()
       client.getOrder(opts.order_id, function (err, resp, body) {
         if (!err && resp.statusCode !== 404) err = statusErr(resp, body)
         if (err) return retry('getOrder', func_args, err)
