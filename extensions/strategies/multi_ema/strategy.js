@@ -31,6 +31,7 @@ module.exports = function container (get, set, clear) {
       this.option('rsi_periods', 'number of periods for RSI', Number, 14)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
+      this.option('order_type_rsi', 'order type for orders based on rsi signal', String)
       // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
       if (s.options.ema_type_weak_down === 'ta_ema') {
         s.options.ema_periods_weak_down = Math.max(s.options.ema_periods_weak_down, 2)
@@ -61,6 +62,9 @@ module.exports = function container (get, set, clear) {
       }
       if (!s.options.order_type_strong) {
         s.options.order_type_strong = s.options.order_type
+      }
+      if (!s.options.order_type_rsi) {
+        s.options.order_type_rsi = s.options.order_type
       }
     },
 
@@ -158,13 +162,13 @@ module.exports = function container (get, set, clear) {
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
-          s.options.order_type = 'taker'
+          s.options.order_type = s.options.order_type_rsi
           return cb()
         } else if (s.overbought) {
           s.overbought = false
           s.trend = 'overbought'
           s.signal = 'sell'
-          s.options.order_type = 'taker'
+          s.options.order_type = s.options.order_type_rsi
           return cb()
         }
       }
