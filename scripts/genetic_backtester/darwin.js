@@ -363,8 +363,8 @@ let strategies = {
     neutral_rate_min_strong_up: RangeFloat(0, 1, 4),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
     rsi_periods: Range(RSI_PERIODS_MIN, RSI_PERIODS_MAX),
-    oversold_rsi: Range(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX),
-    overbought_rsi: Range(OVERBOUGHT_RSI_MIN, OVERBOUGHT_RSI_MAX)
+    oversold_rsi: RangeFloat(OVERSOLD_RSI_MIN, OVERSOLD_RSI_MAX, 2),
+    overbought_rsi: RangeFloat(OVERBOUGHT_RSI_MIN, OVERBOUGHT_RSI_MAX, 2)
   },
   neural: {
     // -- common
