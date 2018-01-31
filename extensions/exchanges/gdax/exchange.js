@@ -243,7 +243,7 @@ module.exports = function container (get, set, clear) {
                   total = n(total).add(balances[property]).value()
                 }
               }
-              balance.currency = Math.max(0, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value())
+              balance.currency = Math.max(0, Math.min(balance.currency, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value()))
               cb(null, balance)
             }
           }
