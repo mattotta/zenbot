@@ -4,45 +4,45 @@
  * 07/01/2017
  */
 
-let roundp = require('round-precision');
+let roundp = require('round-precision')
 
-let PROPERTY_MUTATION_CHANCE = 0.30;
-let PROPERTY_CROSSOVER_CHANCE = 0.50;
+let PROPERTY_MUTATION_CHANCE = 0.30
+let PROPERTY_CROSSOVER_CHANCE = 0.50
 
 module.exports = {
   create: function(strategy) {
-    let r = {};
+    let r = {}
     for (let k in strategy) {
-      let v = strategy[k];
+      let v = strategy[k]
       if (v.type === 'int') {
-        r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
+        r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min)
       } else if (v.type === 'int0') {
-        r[k] = 0;
+        r[k] = 0
         if (Math.random() >= 0.25) {
-          r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
+          r[k] = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min)
         }
       } else if (v.type === 'intfactor') {
         // possible 0 value by providing min 0
-        if (v.min == 0 && Math.random() <= 0.5) r[k] = 0;
-        else r[k] = Math.round(Math.random() * (v.max - v.min + 1)/v.factor)*v.factor;
+        if (v.min == 0 && Math.random() <= 0.5) r[k] = 0
+        else r[k] = Math.round(Math.random() * (v.max - v.min + 1)/v.factor)*v.factor
       } else if (v.type === 'float') {
-        r[k] = (Math.random() * (v.max - v.min)) + v.min;
-        if (v.precision) r[k] = roundp(r[k], v.precision);
+        r[k] = (Math.random() * (v.max - v.min)) + v.min
+        if (v.precision) r[k] = roundp(r[k], v.precision)
       } else if (v.type === 'makertaker') {
-        r[k] = (Math.random() > 0.5) ? 'maker' : 'taker';
+        r[k] = (Math.random() > 0.5) ? 'maker' : 'taker'
       } else if (v.type === 'period_length' || v.type === 'period') {
-        let s = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min);
-        r[k] = s + v.period;
+        let s = Math.floor((Math.random() * (v.max - v.min + 1)) + v.min)
+        r[k] = s + v.period
       } else if (v.type === 'items') {
-        let index = Math.floor(Math.random() * v.items.length);
-        r[k] = v.items[index];
+        let index = Math.floor(Math.random() * v.items.length)
+        r[k] = v.items[index]
       }
     }
-    return r;
+    return r
   },
 
   mutation: function(oldPhenotype, strategy) {
-    let r = module.exports.create(strategy);
+    let r = module.exports.create(strategy)
 
     for (let k in r) {
       if (Math.random() > PROPERTY_MUTATION_CHANCE) {
@@ -50,35 +50,38 @@ module.exports = {
       }
     }
 
-    return r;
+    return r
   },
 
   crossover: function(phenotypeA, phenotypeB, strategy) {
-    let r = module.exports.create(strategy);
+    let r = module.exports.create(strategy)
 
     for (let k in r) {
       if (Math.random() >= PROPERTY_CROSSOVER_CHANCE) {
-        r[k] = phenotypeA[k];
+        r[k] = phenotypeA[k]
       } else {
-        r[k] = phenotypeB[k];
+        r[k] = phenotypeB[k]
       }
     }
 
-    return r;
+    return r
   },
 
   fitness: function(phenotype) {
-    if (typeof phenotype.sim === 'undefined') return 0;
-
-    let vsBuyHoldRate = (phenotype.sim.vsBuyHold / 50);
-    let wlRatio = phenotype.sim.wins - phenotype.sim.losses
-    let wlRatioRate = 1.0 / (1.0 + Math.pow(2.71828, wlRatio < 0 ? wlRatio:-(wlRatio)));
-    let rate = vsBuyHoldRate * (wlRatioRate);
-    return rate;
+    if (typeof phenotype.sim === 'undefined') return 0
+    
+    var vsBuyHoldRate = (phenotype.sim.vsBuyHold / 50)
+    var wlRatio = phenotype.sim.wins / phenotype.sim.losses
+    if(isNaN(wlRatio)) { // zero trades will result in 0/0 which is NaN
+      wlRatio = 1
+    }
+    var wlRatioRate = 1.0 / (1.0 + Math.pow(Math.E, -wlRatio))
+    var rate = vsBuyHoldRate * (wlRatioRate)
+    return rate
   },
 
   competition: function(phenotypeA, phenotypeB) {
     // TODO: Refer to geneticalgorithm documentation on how to improve this with diverstiy
-    return module.exports.fitness(phenotypeA) >= module.exports.fitness(phenotypeB);
+    return module.exports.fitness(phenotypeA) >= module.exports.fitness(phenotypeB)
   }
-};
+}
