@@ -70,7 +70,7 @@ module.exports = function container (get, set, clear) {
 
     calculate: function (s) {
       if (s.options.mode !== 'sim' && s.options.mode !== 'train') {
-        s.strategy.calculateTrend(s)
+        // s.strategy.calculateTrend(s)
       }
     },
 
