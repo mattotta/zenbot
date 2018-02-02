@@ -47,11 +47,11 @@ module.exports = function container (get, set, clear) {
 
   let orders = {}
 
+  let quotes = {}
+
   let websocket_client
 
   let websocket_subscribed = false
-
-  let websocket_quotes = {}
 
   let websocket_trades = []
 
@@ -94,7 +94,7 @@ module.exports = function container (get, set, clear) {
       })
       websocket_client.on('message', function (message) {
         if (message.type == 'ticker') {
-          websocket_quotes[message.product_id] = {
+          quotes[message.product_id] = {
             bid: message.best_bid,
             ask: message.best_ask,
             price: message.price
@@ -247,12 +247,12 @@ module.exports = function container (get, set, clear) {
               cb(null, balance)
             }
           }
-          self.getQuote({product_id: opts.asset + '-' + opts.currency}, function(err, quote) {
+          self.getQuote({product_id: opts.asset + '-' + opts.currency, cached: true}, function(err, quote) {
             calculateBalance(opts.asset, balance.asset, quote.price)
           })
           body.forEach(function (account) {
             if (account.currency !== opts.asset && c.gdax.balance.assets.hasOwnProperty(account.currency)) {
-              self.getQuote({product_id: account.currency + '-' + opts.currency}, function(err, quote) {
+              self.getQuote({product_id: account.currency + '-' + opts.currency, cached: true}, function(err, quote) {
                 calculateBalance(account.currency, account.balance, quote.price)
               })
             }
@@ -262,11 +262,12 @@ module.exports = function container (get, set, clear) {
     },
 
     getQuote: function (opts, cb) {
-      if (websocketClient(opts.product_id) &&
-        websocket_quotes[opts.product_id] &&
-        websocket_quotes[opts.product_id].bid &&
-        websocket_quotes[opts.product_id].ask) {
-        cb(null, websocket_quotes[opts.product_id])
+      if (opts.cached === true &&
+        websocketClient(opts.product_id) &&
+        quotes[opts.product_id] &&
+        quotes[opts.product_id].bid &&
+        quotes[opts.product_id].ask) {
+        cb(null, quotes[opts.product_id])
         return
       }
       let func_args = [].slice.call(arguments)
@@ -274,9 +275,14 @@ module.exports = function container (get, set, clear) {
       client.getProductTicker(function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getQuote', func_args, err)
-        if (body.bid || body.ask)
-          cb(null, {bid: body.bid, ask: body.ask, price: body.price})
-        else
+        if (body.bid || body.ask) {
+          quotes[opts.product_id] = {
+            bid: body.bid,
+            ask: body.ask,
+            price: body.price
+          }
+          cb(null, quotes[opts.product_id])
+        } else
           cb(new Error(opts.product_id + ' has no liquidity to quote'))
       })
     },
