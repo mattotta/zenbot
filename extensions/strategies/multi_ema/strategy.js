@@ -173,7 +173,9 @@ module.exports = function container (get, set, clear) {
         }
       }
 
-      s.signal = s.strategy.getSignal(s, true)
+      let signal = s.strategy.getSignal(s, true)
+        
+      s.signal = signal
       cb()
     },
 
