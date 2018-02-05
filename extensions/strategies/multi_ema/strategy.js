@@ -203,27 +203,31 @@ module.exports = function container (get, set, clear) {
         color_sign = 'green'
         color_strong_up = 'green'
       }
+      if (typeof s.period.trend_ema_rate_strong_down === 'number' && typeof s.period.trend_ema_stddev_strong_down === 'number') {
+        let ema_strong_down = Math.max(s.period.trend_ema_stddev_strong_down, s.options.neutral_rate_min_strong_down)
+        cols.push(z(8, n(s.period.trend_ema_rate_strong_down).format('0.0000'), ' ')[color_strong_down])
+        cols.push(z(8, n(ema_strong_down).format('0.0000'), ' ').grey)
+      } else {
+        cols.push('                  ')
+      }
       if (typeof s.period.trend_ema_rate_weak_down === 'number' && typeof s.period.trend_ema_stddev_weak_down === 'number') {
+        let ema_weak_down = Math.max(s.period.trend_ema_stddev_weak_down, s.options.neutral_rate_min_weak_down)
         cols.push(z(8, n(s.period.trend_ema_rate_weak_down).format('0.0000'), ' ')[color_weak_down])
-        cols.push(z(8, n(s.period.trend_ema_stddev_weak_down).format('0.0000'), ' ').grey)
+        cols.push(z(8, n(ema_weak_down).format('0.0000'), ' ').grey)
       } else  {
         cols.push('                  ')
       }
       if (typeof s.period.trend_ema_rate_weak_up === 'number' && typeof s.period.trend_ema_stddev_weak_up === 'number') {
+        let ema_weak_up = Math.max(s.period.trend_ema_stddev_weak_up, s.options.neutral_rate_min_weak_up)
         cols.push(z(8, n(s.period.trend_ema_rate_weak_up).format('0.0000'), ' ')[color_weak_up])
-        cols.push(z(8, n(s.period.trend_ema_stddev_weak_up).format('0.0000'), ' ').grey)
+        cols.push(z(8, n(ema_weak_up).format('0.0000'), ' ').grey)
       } else  {
         cols.push('                  ')
       }
-      if (typeof s.period.trend_ema_rate_strong_down === 'number' && typeof s.period.trend_ema_stddev_strong_down === 'number') {
-        cols.push(z(8, n(s.period.trend_ema_rate_strong_down).format('0.0000'), ' ')[color_strong_down])
-        cols.push(z(8, n(s.period.trend_ema_stddev_strong_down).format('0.0000'), ' ').grey)
-      } else {
-        cols.push('                  ')
-      }
       if (typeof s.period.trend_ema_rate_strong_up === 'number' && typeof s.period.trend_ema_stddev_strong_up === 'number') {
+        let ema_strong_up = Math.max(s.period.trend_ema_stddev_strong_up, s.options.neutral_rate_min_strong_up)
         cols.push(z(8, n(s.period.trend_ema_rate_strong_up).format('0.0000'), ' ')[color_strong_up])
-        cols.push(z(8, n(s.period.trend_ema_stddev_strong_up).format('0.0000'), ' ').grey)
+        cols.push(z(8, n(ema_strong_up).format('0.0000'), ' ').grey)
       } else {
         cols.push('                  ')
       }
