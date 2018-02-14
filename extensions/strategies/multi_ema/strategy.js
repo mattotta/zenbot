@@ -34,7 +34,7 @@ module.exports = function container (get, set, clear) {
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
       this.option('order_type_rsi', 'order type for orders based on rsi signal', String)
-      
+
       // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
       if (s.options.ema_type_weak_down === 'ta_ema') {
         s.options.ema_periods_weak_down = Math.max(s.options.ema_periods_weak_down, 2)
@@ -49,18 +49,18 @@ module.exports = function container (get, set, clear) {
         s.options.ema_periods_strong_up = Math.max(s.options.ema_periods_strong_up, 2)
       }
 
-      if (s.options.rsi_periods_oversold === 'undefined') {
-        if (s.options.rsi_periods !== 'undefined') {
-          s.options.rsi_periods_oversold = s.options.rsi_periods;
-        } else {
+      if (typeof s.options.rsi_periods_oversold === 'undefined' || s.options.rsi_periods_oversold === 'undefined') {
+        if (typeof s.options.rsi_periods === 'undefined' || s.options.rsi_periods === 'undefined') {
           s.options.rsi_periods_oversold = 14
+        } else {
+          s.options.rsi_periods_oversold = s.options.rsi_periods;
         }
       }
-      if (s.options.rsi_periods_overbought === 'undefined') {
-        if (s.options.rsi_periods !== 'undefined') {
-          s.options.rsi_periods_overbought = s.options.rsi_periods;
-        } else {
+      if (typeof s.options.rsi_periods_overbought === 'undefined' || s.options.rsi_periods_overbought === 'undefined') {
+        if (typeof s.options.rsi_periods === 'undefined' || s.options.rsi_periods === 'undefined') {
           s.options.rsi_periods_overbought = 14
+        } else {
+          s.options.rsi_periods_overbought = s.options.rsi_periods;
         }
       }
       s.options.rsi_periods = 'undefined'
@@ -216,6 +216,7 @@ module.exports = function container (get, set, clear) {
     },
     
     reportRsi: function (rsi) {
+      console.log(rsi)
       if (typeof rsi === 'number') {
         let half = 5
         let bar = ''
