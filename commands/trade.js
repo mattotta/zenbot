@@ -69,10 +69,11 @@ module.exports = function container (get, set, clear) {
           })
         }
         so.selector = get('lib.objectify-selector')(so.selector)
-        var exchange = get('exchanges.' + so.selector.exchange_id)
-        if (!exchange) {
+        s.exchange = require(`../extensions/exchanges/${so.selector.exchange_id}/exchange`)(conf)
+        if (!s.exchange) {
           console.error('cannot trade ' + so.selector.normalized + ': exchange not implemented')
           process.exit(1)
+        
         }
         var engine = get('lib.engine')(s)
 
@@ -495,7 +496,7 @@ module.exports = function container (get, set, clear) {
               engine.update(trades, true, function (err) {
                 if (err) throw err
                 db_cursor = trades[trades.length - 1].time
-                trade_cursor = exchange.getCursor(trades[trades.length - 1])
+                trade_cursor = s.exchange.getCursor(trades[trades.length - 1])
                 setImmediate(getNext)
               })
             })
@@ -581,7 +582,7 @@ module.exports = function container (get, set, clear) {
             })
           }
           var opts = {product_id: so.selector.product_id, from: trade_cursor}
-          exchange.getTrades(opts, function (err, trades) {
+          s.exchange.getTrades(opts, function (err, trades) {
             if (err) {
               if (err.code === 'ETIMEDOUT' || err.code === 'ENOTFOUND' || err.code === 'ECONNRESET') {
                 if (prev_timeout) {
@@ -612,7 +613,7 @@ module.exports = function container (get, set, clear) {
                 return 0
               })
               trades.forEach(function (trade) {
-                var this_cursor = exchange.getCursor(trade)
+                var this_cursor = s.exchange.getCursor(trade)
                 trade_cursor = Math.max(this_cursor, trade_cursor)
                 saveTrade(trade)
               })
