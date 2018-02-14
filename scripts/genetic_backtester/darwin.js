@@ -341,7 +341,7 @@ let strategies = {
   multi_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 120, 's'),
+    period_length: RangePeriod(10, 120, 's'),
     order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 20),
     buy_stop_pct: Range0(1, 20),

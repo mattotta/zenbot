@@ -43,7 +43,6 @@ module.exports = function container (get, set, clear) {
       .option('--max_slippage_pct <pct>', 'avoid selling at a slippage pct above this float', c.max_slippage_pct)
       .option('--rsi_periods <periods>', 'number of periods to calculate RSI at', Number, c.rsi_periods)
       .option('--poll_trades <ms>', 'poll new trades at this interval in ms', Number, c.poll_trades)
-      .option('--keep_lookback_periods <amount>', 'Keep this many lookback periods max. ', Number, c.keep_lookback_periods)
       .option('--disable_stats', 'disable printing order stats')
       .option('--reset_profit', 'start new profit calculation from 0')
       .option('--debug', 'output detailed debug info')
@@ -429,9 +428,6 @@ module.exports = function container (get, set, clear) {
                         }
                       }
                     }
-                    if (s.lookback.length > so.keep_lookback_periods) {
-                      s.lookback.pop()
-                    }
                     lookback_size = s.lookback.length
                     forwardScan()
                     setInterval(forwardScan, so.poll_trades)
@@ -661,9 +657,6 @@ module.exports = function container (get, set, clear) {
                 }
                 if (s.lookback.length > lookback_size) {
                   savePeriod(s.lookback[0])
-                  if (s.lookback.length > so.keep_lookback_periods) {
-                    s.lookback.pop()
-                  }
                   lookback_size = s.lookback.length
                 }
                 if (s.period) {
