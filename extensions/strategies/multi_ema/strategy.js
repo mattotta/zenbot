@@ -29,9 +29,12 @@ module.exports = function container (get, set, clear) {
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
       this.option('rsi_periods', 'number of periods for RSI', Number, 14)
+      this.option('rsi_periods_oversold', 'number of periods for RSI (oversold)', Number)
+      this.option('rsi_periods_overbought', 'number of periods for RSI (overbought)', Number)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
       this.option('order_type_rsi', 'order type for orders based on rsi signal', String)
+      
       // avoid TA_BAD_PARAM errors cause by ema_perdios == 1
       if (s.options.ema_type_weak_down === 'ta_ema') {
         s.options.ema_periods_weak_down = Math.max(s.options.ema_periods_weak_down, 2)
@@ -49,7 +52,8 @@ module.exports = function container (get, set, clear) {
       // set min_periods to maximum needed value to start trading immediately
       s.options.min_periods = Math.max(
         s.options.min_periods,
-        s.options.rsi_periods,
+        s.options.rsi_periods_oversold,
+        s.options.rsi_periods_overbought,
         s.options.ema_periods_weak_down,
         s.options.ema_periods_weak_up,
         s.options.ema_periods_strong_down,
@@ -75,14 +79,19 @@ module.exports = function container (get, set, clear) {
     },
 
     calculateTrend: function(s) {
-      if (s.options.rsi_periods) {
-        get('lib.rsi')(s, 'rsi', s.options.rsi_periods)
-        if (!s.in_preroll && s.period.rsi <= s.options.oversold_rsi && !s.oversold) {
+      if (s.options.rsi_periods_overbought) {
+        get('lib.rsi')(s, 'rsi_overbought', s.options.rsi_periods_overbought)
+        if (!s.in_preroll && s.period.rsi_overbought >= s.options.overbought_rsi && !s.overbought) {
+          s.overbought = true
+          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi_overbought + ' RSI, preparing to sell\n').cyan)
+        }
+      }
+
+      if (s.options.rsi_periods_oversold) {
+        get('lib.rsi')(s, 'rsi_oversold', s.options.rsi_periods_oversold)
+        if (!s.in_preroll && s.period.rsi_oversold <= s.options.oversold_rsi && !s.oversold) {
           s.oversold = true
           if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noversold at ' + s.period.rsi + ' RSI, preparing to buy\n').cyan)
-        } else if (!s.in_preroll && s.period.rsi >= s.options.overbought_rsi && !s.overbought) {
-          s.overbought = true
-          if (s.options.mode !== 'sim' || s.options.verbose) console.log(('\noverbought at ' + s.period.rsi + ' RSI, preparing to sell\n').cyan)
         }
       }
 
@@ -157,17 +166,21 @@ module.exports = function container (get, set, clear) {
     onPeriod: function (s, cb) {
       s.strategy.calculateTrend(s)
 
-      if (!s.in_preroll && typeof s.period.rsi === 'number') {
+      if (!s.in_preroll && typeof s.period.rsi_overbought === 'number') {
+        if (s.overbought) {
+          s.overbought = false
+          s.trend = 'overbought'
+          s.signal = 'sell'
+          s.options.order_type = s.options.order_type_rsi
+          return cb()
+        }
+      }
+
+      if (!s.in_preroll && typeof s.period.rsi_oversold === 'number') {
         if (s.oversold) {
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
-          s.options.order_type = s.options.order_type_rsi
-          return cb()
-        } else if (s.overbought) {
-          s.overbought = false
-          s.trend = 'overbought'
-          s.signal = 'sell'
           s.options.order_type = s.options.order_type_rsi
           return cb()
         }
@@ -183,9 +196,40 @@ module.exports = function container (get, set, clear) {
       s.signal = signal
       cb()
     },
+    
+    reportRsi: function (rsi) {
+      if (typeof rsi === 'number') {
+        let half = 5
+        let bar = ''
+        let stars = 0
+        let rsi_format = n(rsi).format('00.00')
+        if (rsi >= 50) {
+          stars = Math.min(Math.round(((rsi - 50) / 50) * half) + 1, half)
+          bar += ' '.repeat(half - (rsi < 100 ? 3 : 4))
+          bar += rsi_format.green + ' '
+          bar += '+'.repeat(stars).green.bgGreen
+          bar += ' '.repeat(half - stars)
+        }
+        else {
+          stars = Math.min(Math.round(((50 - rsi) / 50) * half) + 1, half)
+          bar += ' '.repeat(half - stars)
+          bar += '-'.repeat(stars).red.bgRed
+          bar += rsi_format.length > 1 ? ' ' : '  '
+          bar += rsi_format.red
+          bar += ' '.repeat(half - 3)
+        }
+        return ' ' + bar
+      }
+      else {
+        return ' '.repeat(14)
+      }
+    },
 
     onReport: function (s) {
       let cols = []
+      
+      cols.push(s.strategy.reportRsi(s.period.rsi_oversold)
+      cols.push(s.strategy.reportRsi(s.period.rsi_overbought)
 
       let sign = '  |  '
       let color_weak_down = 'grey'
