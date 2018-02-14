@@ -124,6 +124,9 @@ module.exports = function container (get, set, clear) {
           s.balance.currency = n(s.balance.currency).add(n(s.period.close).multiply(s.balance.asset)).format('0.00000000')
           s.balance.asset = 0
           s.lookback.unshift(s.period)
+          if (s.lookback.length > so.keep_lookback_periods) {
+            s.lookback.pop()
+          }
           var profit = s.start_capital ? n(s.balance.currency).subtract(s.start_capital).divide(s.start_capital) : n(0)
           output_lines.push('end balance: ' + n(s.balance.currency).format('0.00000000').yellow + ' (' + profit.format('0.00%') + ')')
           //console.log('start_capital', s.start_capital)
