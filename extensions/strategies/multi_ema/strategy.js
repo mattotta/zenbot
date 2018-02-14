@@ -185,6 +185,7 @@ module.exports = function container (get, set, clear) {
       if (!s.in_preroll && typeof s.period.rsi_overbought === 'number') {
         if (s.overbought) {
           s.overbought = false
+          s.oversold = false
           s.trend = 'overbought'
           s.signal = 'sell'
           s.options.order_type = s.options.order_type_rsi
@@ -194,6 +195,7 @@ module.exports = function container (get, set, clear) {
 
       if (!s.in_preroll && typeof s.period.rsi_oversold === 'number') {
         if (s.oversold) {
+          s.overbought = false
           s.oversold = false
           s.trend = 'oversold'
           s.signal = 'buy'
