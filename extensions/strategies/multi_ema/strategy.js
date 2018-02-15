@@ -28,9 +28,8 @@ module.exports = function container (get, set, clear) {
       this.option('order_type_weak', 'order type for orders based on weak signal', String)
       this.option('order_type_strong', 'order type for orders based on strong signal', String)
       this.option('decision', 'control decision mode', String, 'direct')
-      this.option('rsi_periods', 'number of periods for RSI')
-      this.option('rsi_periods_oversold', 'number of periods for RSI (oversold)')
-      this.option('rsi_periods_overbought', 'number of periods for RSI (overbought)')
+      this.option('rsi_periods_oversold', 'number of periods for RSI (oversold)', Number, 14)
+      this.option('rsi_periods_overbought', 'number of periods for RSI (overbought)', Number, 14)
       this.option('oversold_rsi', 'buy when RSI reaches this value', Number, 10)
       this.option('overbought_rsi', 'sell when RSI reaches this value', Number, 90)
       this.option('order_type_rsi', 'order type for orders based on rsi signal', String)
@@ -48,22 +47,6 @@ module.exports = function container (get, set, clear) {
       if (s.options.ema_type_strong_up === 'ta_ema') {
         s.options.ema_periods_strong_up = Math.max(s.options.ema_periods_strong_up, 2)
       }
-
-      if (typeof s.options.rsi_periods_oversold === 'undefined' || s.options.rsi_periods_oversold === 'undefined') {
-        if (typeof s.options.rsi_periods === 'undefined' || s.options.rsi_periods === 'undefined') {
-          s.options.rsi_periods_oversold = 14
-        } else {
-          s.options.rsi_periods_oversold = s.options.rsi_periods;
-        }
-      }
-      if (typeof s.options.rsi_periods_overbought === 'undefined' || s.options.rsi_periods_overbought === 'undefined') {
-        if (typeof s.options.rsi_periods === 'undefined' || s.options.rsi_periods === 'undefined') {
-          s.options.rsi_periods_overbought = 14
-        } else {
-          s.options.rsi_periods_overbought = s.options.rsi_periods;
-        }
-      }
-      s.options.rsi_periods = 'undefined'
 
       // set min_periods to maximum needed value to start trading immediately
       s.options.min_periods = Math.max(
