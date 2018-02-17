@@ -657,6 +657,9 @@ module.exports = function container (get, set, clear) {
                 }
                 if (s.lookback.length > lookback_size) {
                   savePeriod(s.lookback[0])
+                  if (s.lookback.length > so.keep_lookback_periods) {
+                    s.lookback.pop()
+                  }
                   lookback_size = s.lookback.length
                 }
                 if (s.period) {

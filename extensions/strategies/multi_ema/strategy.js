@@ -76,6 +76,9 @@ module.exports = function container (get, set, clear) {
         s.options.ema_periods_strong_up
       )
 
+      // minimize lookback history
+      s.options.keep_lookback_periods = s.options.min_periods
+
       // get order type
       if (!s.options.order_type_weak) {
         s.options.order_type_weak = s.options.order_type
