@@ -69,7 +69,7 @@ module.exports = function container (get, set, clear) {
           })
         }
         so.selector = get('lib.objectify-selector')(so.selector)
-        s.exchange = require(`../extensions/exchanges/${so.selector.exchange_id}/exchange`)(conf)
+        s.exchange = get('exchanges.' + so.selector.exchange_id)
         if (!s.exchange) {
           console.error('cannot trade ' + so.selector.normalized + ': exchange not implemented')
           process.exit(1)        
