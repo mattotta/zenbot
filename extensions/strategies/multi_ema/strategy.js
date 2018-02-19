@@ -219,7 +219,6 @@ module.exports = function container (get, set, clear) {
     },
     
     reportRsi: function (rsi) {
-      console.log(rsi)
       if (typeof rsi === 'number') {
         let half = 5
         let bar = ''
