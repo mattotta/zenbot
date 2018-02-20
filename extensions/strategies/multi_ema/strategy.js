@@ -209,8 +209,8 @@ module.exports = function container (get, set, clear) {
 
       let signal = s.strategy.getSignal(s, true)
 
-      if (signal === 'buy' && s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
-        // avoid multiple buy signals
+      if (s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
+        // avoid same signal again
         signal = null
       }
         
