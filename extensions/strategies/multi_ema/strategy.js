@@ -186,7 +186,7 @@ module.exports = function container (get, set, clear) {
       s.strategy.calculateTrend(s)
 
       if (!s.in_preroll && typeof s.period.rsi_overbought === 'number') {
-        if (s.overbought && (!s.my_trades.length || s.my_trades[s.my_trades.length - 1].type === 'buy')) {
+        if (s.overbought) {
           s.overbought = false
           s.oversold = false
           s.trend = 'overbought'
@@ -197,7 +197,7 @@ module.exports = function container (get, set, clear) {
       }
 
       if (!s.in_preroll && typeof s.period.rsi_oversold === 'number') {
-        if (s.oversold && (!s.my_trades.length || s.my_trades[s.my_trades.length - 1].type === 'sell')) {
+        if (s.oversold) {
           s.overbought = false
           s.oversold = false
           s.trend = 'oversold'
@@ -207,14 +207,7 @@ module.exports = function container (get, set, clear) {
         }
       }
 
-      let signal = s.strategy.getSignal(s, true)
-
-      if (s.my_trades.length && s.my_trades[s.my_trades.length - 1].type === signal) {
-        // avoid same signal again
-        signal = null
-      }
-        
-      s.signal = signal
+      s.signal = s.strategy.getSignal(s, true)
       cb()
     },
     
