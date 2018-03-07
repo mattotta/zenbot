@@ -628,6 +628,7 @@ console.log(simArgs)
 let strategyName = (argv.use_strategies) ? argv.use_strategies : 'all';
 let populationFileName = (argv.population_data) ? argv.population_data : null;
 let populationSize = (argv.population) ? argv.population : 100;
+let populationSurvive = (argv.population_survive) ? argv.population_survive : 0.5;
 let threadCount = (argv.threads) ? argv.threads : PARALLEL_LIMIT;
 
 console.log(`Backtesting strategy ${strategyName} ...`);
@@ -662,7 +663,7 @@ selectedStrategies.forEach(function(v) {
     competeFunction: Phenotypes.competition,
     population: population,
     populationSize: populationSize,
-    populationSurvive: 0.5,
+    populationSurvive: populationSurvive,
     avoidDuplicates: true
   };
 
