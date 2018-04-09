@@ -49,6 +49,30 @@ module.exports = function container (get, set, clear) {
         s.options.ema_periods_strong_up = Math.max(s.options.ema_periods_strong_up, 2)
       }
 
+      // optimize periods parameter
+      if (s.options.ema_periods_weak_down < s.options.ema_periods_strong_down) {
+        let ema_periods_strong_down = s.options.ema_periods_weak_down
+        s.options.ema_periods_weak_down = s.options.ema_periods_strong_down
+        s.options.ema_periods_strong_down = ema_periods_strong_down
+      }
+      if (s.options.ema_periods_weak_up < s.options.ema_periods_strong_up) {
+        let ema_periods_strong_up = s.options.ema_periods_weak_up
+        s.options.ema_periods_weak_up = s.options.ema_periods_strong_up
+        s.options.ema_periods_strong_up = ema_periods_strong_up
+      }
+
+      // optimize neutral rate parameter
+      if (s.options.neutral_rate_min_weak_down > s.options.neutral_rate_min_strong_down) {
+        let neutral_rate_min_strong_down = s.options.neutral_rate_min_weak_down
+        s.options.neutral_rate_min_weak_down = s.options.neutral_rate_min_strong_down
+        s.options.neutral_rate_min_strong_down = neutral_rate_min_strong_down
+      }
+      if (s.options.neutral_rate_min_weak_up > s.options.neutral_rate_min_strong_up) {
+        let neutral_rate_min_strong_up = s.options.neutral_rate_min_weak_up
+        s.options.neutral_rate_min_weak_up = s.options.neutral_rate_min_strong_up
+        s.options.neutral_rate_min_strong_up = neutral_rate_min_strong_up
+      }
+
       if (typeof s.options.rsi_periods_oversold === 'undefined' || s.options.rsi_periods_oversold === 'undefined') {
         if (typeof s.options.rsi_periods === 'undefined' || s.options.rsi_periods === 'undefined') {
           s.options.rsi_periods_oversold = 14
