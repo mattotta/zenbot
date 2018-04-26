@@ -27,11 +27,7 @@ c.gdax.websocket.enabled = true
 c.gdax.websocket.trade_history = 1000
 c.gdax.balance = {}
 c.gdax.balance.split = false
-c.gdax.balance.assets = {}
-c.gdax.balance.assets.count = 3
-c.gdax.balance.assets.BTC = 0.33
-c.gdax.balance.assets.ETH = 0.33
-c.gdax.balance.assets.LTC = 0.33
+c.gdax.balance.assets = ['BTC', 'ETH', 'LTC']
 
 // to enable Poloniex trading, enter your API credentials:
 c.poloniex = {}

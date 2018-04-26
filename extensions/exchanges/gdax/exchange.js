@@ -1,6 +1,4 @@
 let Gdax = require('gdax')
-  , path = require('path')
-  , colors = require('colors')
   , n = require('numbro')
 
 module.exports = function container (get, set, clear) {
@@ -129,7 +127,7 @@ module.exports = function container (get, set, clear) {
 
     getTrades: function (opts, cb) {
       let func_args = [].slice.call(arguments)
-      let self = this;
+      let self = this
       this.getProductTrades(opts, function (err, trades) {
         if (err) return retry('getTrades', func_args, err)
         if (trades.length) {
@@ -232,26 +230,27 @@ module.exports = function container (get, set, clear) {
         if (!c.gdax.balance.split) {
           cb(null, balance)
         } else {
+          let shares = c.gdax.balance.assets.length
+          let total = n(balance.currency).value()
           let balances = { count: 0 }
           let calculateBalance = function(_asset, _balance, _price) {
             balances[_asset] = n(_balance).multiply(_price).value()
             balances.count++
-            if (balances.count === c.gdax.balance.assets.count) {
-              let total = n(balance.currency).value()
-              for (let property in balances) {
-                if (property !== 'count' && balances.hasOwnProperty(property)) {
-                  total = n(total).add(balances[property]).value()
+            total = n(total).add(balances[_asset]).value()
+            if (balances.count === shares) {
+              let share = n(total).divide(shares).value()
+              c.gdax.balance.assets.forEach(function (asset) {
+                if (balances[asset] > share) {
+                  total = n(total).subtract(balances[asset])
+                  shares--
                 }
-              }
-              balance.currency = Math.max(0, Math.min(balance.currency, n(total).multiply(c.gdax.balance.assets[opts.asset]).subtract(balances[opts.asset]).value()))
+              })
+              balance.currency = Math.max(0, Math.min(balance.currency, n(total).divide(shares).subtract(balances[opts.asset]).value()))
               cb(null, balance)
             }
           }
-          self.getQuote({product_id: opts.asset + '-' + opts.currency, cached: true}, function(err, quote) {
-            calculateBalance(opts.asset, balance.asset, quote.price)
-          })
           body.forEach(function (account) {
-            if (account.currency !== opts.asset && c.gdax.balance.assets.hasOwnProperty(account.currency)) {
+            if (c.gdax.balance.assets.indexOf(account.currency) !== -1) {
               self.getQuote({product_id: account.currency + '-' + opts.currency, cached: true}, function(err, quote) {
                 calculateBalance(account.currency, account.balance, quote.price)
               })
