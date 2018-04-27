@@ -45,7 +45,12 @@ let argv = require('yargs').argv;
 let selector = (argv.selector) ? argv.selector : 'gdax.BTC-EUR';
 let selectors = selector.split(',')
 
+let force_period_length = (argv.period_length) ? argv.period_length : false;
+
 let runCommand = (taskStrategyName, phenotype, cb) => {
+  if (force_period_length !== false) {
+    phenotype.period_length = force_period_length;
+  }
   let commonArgs = `--strategy=${taskStrategyName} --period_length=${phenotype.period_length} --sell_stop_pct=${phenotype.sell_stop_pct} --buy_stop_pct=${phenotype.buy_stop_pct} --profit_stop_enable_pct=${phenotype.profit_stop_enable_pct} --profit_stop_pct=${phenotype.profit_stop_pct} --order_type_stop=${phenotype.order_type_stop}`;
   let strategyArgs = {
     crossover_vwap: `--markdown_buy_pct=${phenotype.markdown_buy_pct} --markup_sell_pct=${phenotype.markup_sell_pct} --order_type=${phenotype.order_type} --min_periods=${phenotype.min_periods} --emalen1=${phenotype.emalen1} --vwap_length=${phenotype.vwap_length} --vwap_max=${phenotype.vwap_max} --min_diff_pct=${phenotype.min_diff_pct}`,
