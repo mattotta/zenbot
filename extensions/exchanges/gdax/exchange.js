@@ -4,13 +4,13 @@ let Gdax = require('gdax')
 module.exports = function container (get, set, clear) {
   let c = get('conf')
 
-  let public_client = {}, authed_client
+  let public_client, authed_client
 
-  function publicClient (product_id) {
-    if (!public_client[product_id]) {
-      public_client[product_id] = new Gdax.PublicClient(product_id, c.gdax.apiURI)
+  function publicClient () {
+    if (!public_client) {
+      public_client = new Gdax.PublicClient(c.gdax.apiURI)
     }
-    return public_client[product_id]
+    return public_client
   }
 
   function authedClient () {
@@ -64,11 +64,9 @@ module.exports = function container (get, set, clear) {
       if (c.gdax.balance.split) {
         let product_ids = []
         let currency = product_id.split('-').pop()
-        for (let property in c.gdax.balance.assets) {
-          if (property !== 'count' && c.gdax.balance.assets.hasOwnProperty(property)) {
-            product_ids.push(property + '-' + currency)
-          }
-        }
+        c.gdax.balance.assets.forEach(function (asset) {
+          product_ids.push(asset + '-' + currency)
+        })
         channels = ['matches', { name: 'ticker', product_ids: product_ids }]
       }
       websocket_client = new Gdax.WebsocketClient(
@@ -76,7 +74,7 @@ module.exports = function container (get, set, clear) {
         feed,
         auth,
         {
-          heartbeat: false, 
+          heartbeat: false,
           channels: channels
         }
       )
@@ -182,7 +180,7 @@ module.exports = function container (get, set, clear) {
           cb(null, websocket_trades)
         }
       } else {
-        let client = publicClient(opts.product_id)
+        let client = publicClient()
         let args = {}
         if (opts.from) {
           // move cursor into the future
@@ -192,7 +190,7 @@ module.exports = function container (get, set, clear) {
           // move cursor into the past
           args.after = opts.to
         }
-        client.getProductTrades(args, function (err, resp, body) {
+        client.getProductTrades(opts.product_id, args, function (err, resp, body) {
           if (!err) err = statusErr(resp, body)
           if (err) return cb(err, null)
           let trades = body.map(function (trade) {
@@ -249,8 +247,11 @@ module.exports = function container (get, set, clear) {
               cb(null, balance)
             }
           }
+          self.getQuote({product_id: opts.asset + '-' + opts.currency, cached: true}, function(err, quote) {
+            calculateBalance(opts.asset, balance.asset, quote.price)
+          })
           body.forEach(function (account) {
-            if (c.gdax.balance.assets.indexOf(account.currency) !== -1) {
+            if (account.currency !== opts.asset && c.gdax.balance.assets.indexOf(account.currency) !== -1) {
               self.getQuote({product_id: account.currency + '-' + opts.currency, cached: true}, function(err, quote) {
                 calculateBalance(account.currency, account.balance, quote.price)
               })
@@ -270,8 +271,8 @@ module.exports = function container (get, set, clear) {
         return
       }
       let func_args = [].slice.call(arguments)
-      let client = publicClient(opts.product_id)
-      client.getProductTicker(function (err, resp, body) {
+      let client = publicClient()
+      client.getProductTicker(opts.product_id, function (err, resp, body) {
         if (!err) err = statusErr(resp, body)
         if (err) return retry('getQuote', func_args, err)
         if (body.bid || body.ask) {
