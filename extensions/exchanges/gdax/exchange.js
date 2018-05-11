@@ -294,9 +294,13 @@ module.exports = function container (get, set, clear) {
     cancelOrder: function (opts, cb) {
       let func_args = [].slice.call(arguments)
       let client = authedClient()
+      console.log('cancelOrder request: ' + opts.order_id)
       client.cancelOrder(opts.order_id, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
+        console.log('cancelOrder response:')
+        console.log(resp.statusCode)
+        console.log(body)
         if (body && (body.message === 'Order already done' || body.message === 'order not found')) return cb()
         if (!err) err = statusErr(resp, body)
         if (err) return retry('cancelOrder', func_args, err)
@@ -331,9 +335,14 @@ module.exports = function container (get, set, clear) {
       delete opts.orig_size
       delete opts.remaining_size
       delete opts.orig_price
+      console.log('buy request:')
+      console.log(opts)
       client.buy(opts, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
+        console.log('buy response:')
+        console.log(resp.statusCode)
+        console.log(body)
         if (body && body.message === 'Insufficient funds') {
           let order = {
             status: 'rejected',
@@ -373,9 +382,14 @@ module.exports = function container (get, set, clear) {
       delete opts.orig_size
       delete opts.remaining_size
       delete opts.orig_price
+      console.log('sell request:')
+      console.log(opts)
       client.sell(opts, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
+        console.log('sell response:')
+        console.log(resp.statusCode)
+        console.log(body)
         if (body && body.message === 'Insufficient funds') {
           let order = {
             status: 'rejected',
@@ -393,9 +407,13 @@ module.exports = function container (get, set, clear) {
     getOrder: function (opts, cb) {
       let func_args = [].slice.call(arguments)
       let client = authedClient()
+      console.log('getOrder request: ' + opts.order_id)
       client.getOrder(opts.order_id, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
+        console.log('getOrder response:')
+        console.log(resp.statusCode)
+        console.log(body)
         if (!err && resp.statusCode !== 404) err = statusErr(resp, body)
         if (err) return retry('getOrder', func_args, err)
         if (resp.statusCode === 404) {
