@@ -302,7 +302,7 @@ module.exports = function container (get, set, clear) {
         console.log(resp.statusCode)
         console.log(body)
         if (body && (body.message === 'Order already done' || body.message === 'order not found')) return cb()
-        if (body && body.arrayIndexOf(opts.order_id)) return cb()
+        if (body && body.indexOf(opts.order_id) !== -1) return cb()
         if (!err) err = statusErr(resp, body)
         if (err) return retry('cancelOrder', func_args, err)
         cb()
