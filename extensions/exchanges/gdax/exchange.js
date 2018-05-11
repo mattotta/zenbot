@@ -416,7 +416,7 @@ module.exports = function container (get, set, clear) {
         console.log(resp.statusCode)
         console.log(body)
         if (!err && resp.statusCode !== 404) err = statusErr(resp, body)
-        if (err) return retry('getOrder', func_args, err)
+        if (err && resp.statusCode !== 404) return retry('getOrder', func_args, err)
         if (resp.statusCode === 404) {
           // order was cancelled. recall from cache
           body = orders['~' + opts.order_id]
