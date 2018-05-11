@@ -294,8 +294,10 @@ module.exports = function container (get, set, clear) {
       client.cancelOrder(opts.order_id, function (err, resp, body) {
         console.log('getOrder response:')
         console.log(err)
-        console.log(resp.statusCode)
-        console.log(body)
+        if (!err) {
+          console.log(resp.statusCode)
+          console.log(body)
+        }
         if (body && (body.message === 'Order already done' || body.message === 'order not found')) return cb()
         if (!err) err = statusErr(resp, body)
         if (err) return retry('cancelOrder', func_args, err)
@@ -335,8 +337,10 @@ module.exports = function container (get, set, clear) {
       client.buy(opts, function (err, resp, body) {
         console.log('buy response:')
         console.log(err)
-        console.log(resp.statusCode)
-        console.log(body)
+        if (!err) {
+          console.log(resp.statusCode)
+          console.log(body)
+        }
         if (body && body.message === 'Insufficient funds') {
           let order = {
             status: 'rejected',
@@ -381,8 +385,10 @@ module.exports = function container (get, set, clear) {
       client.sell(opts, function (err, resp, body) {
         console.log('sell response:')
         console.log(err)
-        console.log(resp.statusCode)
-        console.log(body)
+        if (!err) {
+          console.log(resp.statusCode)
+          console.log(body)
+        }
         if (body && body.message === 'Insufficient funds') {
           let order = {
             status: 'rejected',
@@ -404,8 +410,10 @@ module.exports = function container (get, set, clear) {
       client.getOrder(opts.order_id, function (err, resp, body) {
         console.log('getOrder response:')
         console.log(err)
-        console.log(resp.statusCode)
-        console.log(body)
+        if (!err) {
+          console.log(resp.statusCode)
+          console.log(body)
+        }
         if (!err && resp.statusCode !== 404) err = statusErr(resp, body)
         if (err) return retry('getOrder', func_args, err)
         if (resp.statusCode === 404) {
