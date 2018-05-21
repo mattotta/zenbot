@@ -24,7 +24,7 @@ let VERSION = 'Zenbot 4 Genetic Backtester v0.2';
 let PARALLEL_LIMIT = (process.env.PARALLEL_LIMIT && +process.env.PARALLEL_LIMIT) || require('os').cpus().length;
 
 let TREND_EMA_MIN = 1;
-let TREND_EMA_MAX = 3600;
+let TREND_EMA_MAX = 240;
 
 let OVERSOLD_RSI_MIN = 0;
 let OVERSOLD_RSI_MAX = 50;
@@ -33,7 +33,7 @@ let OVERBOUGHT_RSI_MIN = 50;
 let OVERBOUGHT_RSI_MAX = 100;
 
 let RSI_PERIODS_MIN = 1;
-let RSI_PERIODS_MAX = 3600;
+let RSI_PERIODS_MAX = 240;
 
 let iterationCount = 0;
 
@@ -346,7 +346,7 @@ let strategies = {
   multi_ema: {
     // -- common
     selector: RangeItems(selectors),
-    period_length: RangePeriod(1, 30, 'm'),
+    period_length: RangePeriod(1, 120, 'm'),
     order_type_stop: RangeMakerTaker(),
     sell_stop_pct: Range0(1, 20),
     buy_stop_pct: Range0(1, 20),
@@ -362,10 +362,10 @@ let strategies = {
     neutral_rate_weak_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong_down: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
     neutral_rate_strong_up: RangeItems([0, 'auto', 'auto_trend', 'auto_new']),
-    neutral_rate_min_weak_down: RangeFloat(0, 0.1, 6),
-    neutral_rate_min_weak_up: RangeFloat(0, 0.1, 6),
-    neutral_rate_min_strong_down: RangeFloat(0, 1, 6),
-    neutral_rate_min_strong_up: RangeFloat(0, 1, 6),
+    neutral_rate_min_weak_down: RangeFloat(0, 1, 4),
+    neutral_rate_min_weak_up: RangeFloat(0, 1, 4),
+    neutral_rate_min_strong_down: RangeFloat(0, 1, 4),
+    neutral_rate_min_strong_up: RangeFloat(0, 1, 4),
     decision: RangeItems(['direct', 'direct-remember', 'after', 'after-remember']),
     rsi_periods_oversold: Range(RSI_PERIODS_MIN, RSI_PERIODS_MAX),
     rsi_periods_overbought: Range(RSI_PERIODS_MIN, RSI_PERIODS_MAX),
