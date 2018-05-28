@@ -24,7 +24,7 @@ module.exports = function container (get, set, clear) {
   }
 
   function statusErr (resp, body) {
-    if (resp.statusCode !== 200) {
+    if (resp && resp.statusCode !== 200) {
       let err = new Error('non-200 status: ' + resp.statusCode)
       err.code = 'HTTP_STATUS'
       err.body = body
@@ -397,7 +397,7 @@ module.exports = function container (get, set, clear) {
       client.getOrder(opts.order_id, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
-        if (resp.statusCode !== 404) {
+        if (!resp || resp.statusCode !== 404) {
           if (!err) err = statusErr(resp, body)
           if (err) return retry('getOrder', func_args, err)
         } else {
