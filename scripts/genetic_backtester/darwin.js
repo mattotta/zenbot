@@ -84,19 +84,17 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
       return cb(null, null);
     }
 
-    let result = null;
     try {
-      result = processOutput(stdout);
-      phenotype['sim'] = result;
-      result['selector'] = phenotype.selector;
-      result['fitness'] = Phenotypes.fitness(phenotype);
+      phenotype['sim'] = processOutput(stdout);
+      phenotype.sim['selector'] = phenotype.selector;
+      phenotype.sim['fitness'] = Phenotypes.fitness(phenotype);
     } catch (err) {
       console.log(`Bad output detected`, err.toString());
       console.log(stdout);
       console.log(err)
     }
 
-    cb(null, result);
+    cb(null);
   });
 };
 
@@ -665,6 +663,7 @@ selectedStrategies.forEach(function(v) {
       return Phenotypes.crossover(phenotypeA, phenotypeB, strategies[v]);
     },
     fitnessFunction: Phenotypes.fitness,
+    placeFunction: Phenotypes.place,
     competeFunction: Phenotypes.competition,
     population: population,
     populationSize: populationSize,
@@ -737,71 +736,114 @@ let simulateGeneration = () => {
     runUpdate(days, s);
   })
 
-  iterationCount = 1;
-  let tasks = selectedStrategies.map(v => pools[v]['pool'].population().map(phenotype => {
-    return cb => {
-      runCommand(v, phenotype, cb);
-    };
-  })).reduce((a, b) => a.concat(b));
-
-  parallel(tasks, threadCount, (err, results) => {
-    console.log("\n\Generation complete, saving results...");
-    results = results.filter(function(r) {
-      return !!r;
-    });
-
-    results.sort((a, b) => (a.fitness < b.fitness) ? 1 : ((b.fitness < a.fitness) ? -1 : 0));
-
-    let fieldsGeneral = ['selector', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'fees', 'wins', 'losses', 'period_length', 'days', 'params'];
-    let fieldNamesGeneral = ['Selector', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', 'Fees ($)', '# Wins', '# Losses', 'Period', '# Days', 'Full Parameters'];
-
-    let dataCSV = json2csv({
-      data: results,
-      fields: fieldsGeneral,
-      fieldNames: fieldNamesGeneral
-    });
-
-    let poolData = {};
-    selectedStrategies.forEach(function(v) {
-      poolData[v] = pools[v]['pool'].population();
-    });
-    let dataJSON = JSON.stringify(poolData, null, 2);
-
-    let fileIdentifier = Math.round(+new Date() / 1000);
-    if (selectors.length === 1) {
-      fileIdentifier = selectors[0] + '_' + fileIdentifier;
+  let daysList = [];
+  do {
+    daysList.push(days)
+    if (days > 60) {
+      days = days -30
+    } else {
+      days = Math.floor(days / 2)
     }
-    fileIdentifier = fileIdentifier + '_gen_' + generationCount
+  } while(days >= 3)
 
-    let csvFileName = `simulations/backtesting_${fileIdentifier}.csv`;
-    let jsonFileName = `simulations/generation_data_${fileIdentifier}.json`;
-    let filesSaved = 0;
-    saveGenerationData(csvFileName, jsonFileName, dataCSV, dataJSON, (id)=>{
-      filesSaved++;
-      if(filesSaved == 2){        
-        console.log(`\n\nGeneration's Best Results`);
-        selectedStrategies.forEach((v)=> {
-          let best = pools[v]['pool'].best();
-          let bestCommand = '';
-          if(best.sim){
-            console.log(`\t(${v}) Sim Fitness ${best.sim.fitness}, VS Buy and Hold: ${best.sim.vsBuyHold} End Balance: ${best.sim.endBalance}, Wins/Losses ${best.sim.wins}/${best.sim.losses}.`);
-            bestCommand = generateCommandParams(best.sim);
-          } else {
-            console.log(`\t(${v}) Result Fitness ${results[0].fitness}, VS Buy and Hold: ${results[0].vsBuyHold}, End Balance: ${results[0].endBalance}, Wins/Losses ${results[0].wins}/${results[0].losses}.`);
-            bestCommand = generateCommandParams(results[0]);
-          }
+  let simulateDays = () => {
+    simArgs.days = daysList.pop();
+    delete(simArgs.start)
 
-          // prepare command snippet from top result for this strat
-          console.log('./zenbot.sh sim ' + bestCommand + '\n');
-            
-          let nextGen = pools[v]['pool'].evolve();
+    iterationCount = 1;
+
+    console.log("\n\Start simulation for " + simArgs.days + " days...\n" );
+
+    let tasks = selectedStrategies.map(v => pools[v]['pool'].population().map(phenotype => {
+      return cb => {
+        runCommand(v, phenotype, cb);
+      };
+    })).reduce((a, b) => a.concat(b));
+
+    parallel(tasks, threadCount, (err) => {
+
+      let poolData = {};
+      selectedStrategies.forEach(function(v) {
+        let population = pools[v]['pool'].population();
+        population.sort((a, b) => (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : 0));
+        let place = 0;
+        population.forEach(function(phenotype) {
+          phenotype.places.push(++place);
         });
-        
-        simulateGeneration();
+        poolData[v] = population;
+      });
+
+      console.log("\n\Generation simulated for " + simArgs.days + " days..." );
+
+      if (daysList.length > 0) {
+
+        simulateDays();
+
+      } else {
+        let results = [];
+
+        selectedStrategies.forEach(function(v) {
+          poolData[v].forEach(function(phenotype) {
+            phenotype.sim.uuid = phenotype.uuid;
+            phenotype.sim.places = phenotype.places;
+            phenotype.places = [];
+            phenotype.sim['place'] = Phenotypes.place(phenotype);
+            results.push(phenotype.sim);
+          });
+          poolData[v].sort((a, b) => (a.sim.place > b.sim.place) ? 1 : ((b.sim.place > a.sim.place) ? -1 : (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : 0)));
+        });
+
+        results.sort((a, b) => (a.place > b.place) ? 1 : ((b.place > a.place) ? -1 : (a.fitness < b.fitness) ? 1 : ((b.fitness < a.fitness) ? -1 : 0)));
+
+        console.log("\n\Generation complete, saving results...");
+
+        let fieldsGeneral = ['selector', 'uuid', 'places', 'place', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'fees', 'wins', 'losses', 'period_length', 'days', 'params'];
+        let fieldNamesGeneral = ['Selector', 'UUID', 'Places', 'Place', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', 'Fees ($)', '# Wins', '# Losses', 'Period', '# Days', 'Full Parameters'];
+
+        let dataCSV = json2csv({
+          data: results,
+          fields: fieldsGeneral,
+          fieldNames: fieldNamesGeneral
+        });
+
+        let dataJSON = JSON.stringify(poolData, null, 2);
+
+        let fileIdentifier = Math.round(+new Date() / 1000);
+        if (selectors.length === 1) {
+          fileIdentifier = selectors[0] + '_' + fileIdentifier;
+        }
+        fileIdentifier = fileIdentifier + '_gen_' + generationCount
+
+        let csvFileName = `simulations/backtesting_${fileIdentifier}.csv`;
+        let jsonFileName = `simulations/generation_data_${fileIdentifier}.json`;
+        let filesSaved = 0;
+        saveGenerationData(csvFileName, jsonFileName, dataCSV, dataJSON, (id)=>{
+          filesSaved++;
+          if(filesSaved == 2){
+            console.log(`\n\nGeneration's Best Results`);
+            selectedStrategies.forEach((v)=> {
+              let best = poolData[v][0];
+              console.log(`\t(${v}) Sim Fitness ${best.sim.fitness}, VS Buy and Hold: ${best.sim.vsBuyHold} End Balance: ${best.sim.endBalance}, Wins/Losses ${best.sim.wins}/${best.sim.losses}.`);
+              let bestCommand = generateCommandParams(best.sim);
+
+              // prepare command snippet from top result for this strat
+              console.log('./zenbot.sh sim ' + bestCommand + '\n');
+
+              pools[v]['pool'].evolve();
+            });
+
+            simulateGeneration();
+          }
+        });
+
       }
+
     });
- 
-  });
+
+  };
+
+  simulateDays();
+
 };
 
 simulateGeneration();

@@ -5,6 +5,7 @@
  */
 
 let roundp = require('round-precision')
+let uuidv4 = require('uuid/v4')
 
 let PROPERTY_MUTATION_CHANCE = 0.30
 let PROPERTY_CROSSOVER_CHANCE = 0.50
@@ -38,6 +39,8 @@ module.exports = {
         r[k] = v.items[index]
       }
     }
+    r['uuid'] = uuidv4()
+    r['places'] = []
     return r
   },
 
@@ -45,8 +48,10 @@ module.exports = {
     let r = module.exports.create(strategy)
 
     for (let k in r) {
-      if (Math.random() > PROPERTY_MUTATION_CHANCE) {
-        r[k] = oldPhenotype[k]
+      if (k !== 'uuid' && k !== 'places') {
+        if (Math.random() > PROPERTY_MUTATION_CHANCE) {
+          r[k] = oldPhenotype[k]
+        }
       }
     }
 
@@ -57,10 +62,12 @@ module.exports = {
     let r = module.exports.create(strategy)
 
     for (let k in r) {
-      if (Math.random() >= PROPERTY_CROSSOVER_CHANCE) {
-        r[k] = phenotypeA[k]
-      } else {
-        r[k] = phenotypeB[k]
+      if (k !== 'uuid' && k !== 'places') {
+        if (Math.random() >= PROPERTY_CROSSOVER_CHANCE) {
+          r[k] = phenotypeA[k]
+        } else {
+          r[k] = phenotypeB[k]
+        }
       }
     }
 
@@ -69,7 +76,9 @@ module.exports = {
 
   fitness: function(phenotype) {
     if (typeof phenotype.sim === 'undefined') return 0
-    
+
+    if (typeof phenotype.sim.fitness !== 'undefined') return phenotype.sim.fitness
+
     var vsBuyHoldRate = (phenotype.sim.vsBuyHold / 50)
     var wlRatio = phenotype.sim.wins / phenotype.sim.losses
     if(isNaN(wlRatio)) { // zero trades will result in 0/0 which is NaN
@@ -80,8 +89,23 @@ module.exports = {
     return rate
   },
 
+  place: function(phenotype) {
+    if (typeof phenotype.sim === 'undefined') return 0
+
+    if (typeof phenotype.sim.place !== 'undefined') return phenotype.sim.place
+
+    if (phenotype.sim.places.length === 0) return 0
+
+    return phenotype.sim.places.reduce((a, b) => a + b)
+  },
+
   competition: function(phenotypeA, phenotypeB) {
-    // TODO: Refer to geneticalgorithm documentation on how to improve this with diverstiy
-    return module.exports.fitness(phenotypeA) >= module.exports.fitness(phenotypeB)
+    let placeA = module.exports.place(phenotypeA)
+    let placeB = module.exports.place(phenotypeB)
+    if (placeA === placeB) {
+      return module.exports.fitness(phenotypeA) >= module.exports.fitness(phenotypeB)
+    } else {
+      return placeA <= placeB
+    }
   }
 }
