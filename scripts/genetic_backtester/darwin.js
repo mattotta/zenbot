@@ -768,6 +768,9 @@ let simulateGeneration = () => {
         population.sort((a, b) => (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : 0));
         let place = 0;
         population.forEach(function(phenotype) {
+          if (Object.keys(phenotype).indexOf('places') === -1) {
+            phenotype.places = [];
+          }
           phenotype.places.push(++place);
         });
         poolData[v] = population;
