@@ -94,7 +94,7 @@ module.exports = {
 
     if (typeof phenotype.sim.place !== 'undefined') return phenotype.sim.place
 
-    if (phenotype.sim.places.length === 0) return 0
+    if (typeof phenotype.sim.places === 'undefined'|| phenotype.sim.places.length === 0) return 0
 
     return phenotype.sim.places.reduce((a, b) => a + b)
   },
