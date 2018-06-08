@@ -88,6 +88,8 @@ let runCommand = (taskStrategyName, phenotype, cb) => {
       phenotype['sim'] = processOutput(stdout);
       phenotype.sim['selector'] = phenotype.selector;
       phenotype.sim['fitness'] = Phenotypes.fitness(phenotype);
+      phenotype.sim['places'] = phenotype.places;
+      phenotype.sim['place'] = Phenotypes.place(phenotype);
     } catch (err) {
       console.log(`Bad output detected`, err.toString());
       console.log(stdout);
@@ -765,7 +767,7 @@ let simulateGeneration = () => {
       let poolData = {};
       selectedStrategies.forEach(function(v) {
         let population = pools[v]['pool'].population();
-        population.sort((a, b) => (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : 0));
+        population.sort((a, b) => (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : (a.sim.place > b.sim.place) ? 1 : ((b.sim.place > a.sim.place) ? -1 : 0)));
         let place = 0;
         population.forEach(function(phenotype) {
           if (Object.keys(phenotype).indexOf('places') === -1) {
