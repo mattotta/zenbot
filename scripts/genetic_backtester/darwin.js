@@ -792,6 +792,7 @@ let simulateGeneration = () => {
             phenotype.sim.uuid = phenotype.uuid;
             phenotype.sim.places = phenotype.places;
             phenotype.places = [];
+            delete phenotype.sim.place;
             phenotype.sim['place'] = Phenotypes.place(phenotype);
             results.push(phenotype.sim);
           });
