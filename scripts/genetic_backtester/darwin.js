@@ -769,11 +769,18 @@ let simulateGeneration = () => {
         let population = pools[v]['pool'].population();
         population.sort((a, b) => (a.sim.fitness < b.sim.fitness) ? 1 : ((b.sim.fitness < a.sim.fitness) ? -1 : (a.sim.place > b.sim.place) ? 1 : ((b.sim.place > a.sim.place) ? -1 : 0)));
         let place = 0;
+        let previousPlace = null;
+        let previousFitness = null;
         population.forEach(function(phenotype) {
           if (Object.keys(phenotype).indexOf('places') === -1) {
             phenotype.places = [];
           }
-          phenotype.places.push(++place);
+          if (previousFitness !== phenotype.sim.fitness || previousPlace !== phenotype.sim.place) {
+            previousFitness = phenotype.sim.fitness;
+            previousPlace = phenotype.sim.place;
+            ++place;
+          }
+          phenotype.places.push(place);
         });
         poolData[v] = population;
       });
