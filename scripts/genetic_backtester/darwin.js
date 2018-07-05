@@ -635,6 +635,7 @@ let populationFileName = (argv.population_data) ? argv.population_data : null;
 let populationSize = (argv.population) ? argv.population : 100;
 let populationSurvive = (argv.population_survive) ? argv.population_survive : 0.5;
 let threadCount = (argv.threads) ? argv.threads : PARALLEL_LIMIT;
+let simulationType = (argv.simulation_type) ? argv.simulation_type : 'full';
 
 console.log(`Backtesting strategy ${strategyName} ...`);
 console.log(`Creating population of ${populationSize} ...\n`);
@@ -739,22 +740,51 @@ let simulateGeneration = () => {
   })
 
   let daysList = [];
-  do {
-    daysList.push(days)
-    if (days > 60) {
-      days = days -30
-    } else {
-      days = Math.floor(days / 2)
-    }
-  } while(days >= 3)
+  if (simulationType === 'increasing') {
+    do {
+      daysList.push(days)
+      if (days > 60) {
+        days = days - 30
+      } else {
+        days = Math.floor(days / 2)
+      }
+    } while (days >= 3)
+  }
 
-  let simulateDays = () => {
-    simArgs.days = daysList.pop();
-    delete(simArgs.start)
+  let startList = [];
+  if (simulationType === 'shifting') {
+    let start = moment(argv.start).valueOf();
+    let end;
+    if (argv.end) {
+      end = moment(argv.end).valueOf();
+    } else {
+      end = tb('1d').toMilliseconds();
+    }
+    while (start < end) {
+      startList.push(moment(start).format("YYYY-MM-DD"));
+      start += (30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  let simulate = () => {
+    if (simulationType === 'increasing') {
+      simArgs.days = daysList.pop();
+      delete(simArgs.start);
+      console.log("\n\nStart simulation for " + simArgs.days + " days ...\n" );
+    } else if (simulationType === 'shifting') {
+      simArgs.start = startList.shift();
+      if (startList.length > 0) {
+        simArgs.days = 60;
+      } else {
+        delete(simArgs.days);
+      }
+      console.log("\n\nStart simulation for " + simArgs.days + " days, starting on " + simArgs.start + " ...\n" );
+    } else {
+      console.log("\n\nStart simulation for " + simArgs.days + " days ...\n" );
+    }
 
     iterationCount = 1;
 
-    console.log("\n\Start simulation for " + simArgs.days + " days...\n" );
 
     let tasks = selectedStrategies.map(v => pools[v]['pool'].population().map(phenotype => {
       return cb => {
@@ -785,11 +815,14 @@ let simulateGeneration = () => {
         poolData[v] = population;
       });
 
-      console.log("\n\Generation simulated for " + simArgs.days + " days..." );
+      if (simulationType === 'shifting') {
+        console.log("\n\nGeneration simulated for " + simArgs.days + " days, started on " + simArgs.start + " ...\n" );
+      } else {
+        console.log("\n\nGeneration simulated for " + simArgs.days + " days ...");
+      }
+      if ((simulationType === 'increasing' && daysList.length > 0) || (simulationType === 'shifting' && startList.length > 0)) {
 
-      if (daysList.length > 0) {
-
-        simulateDays();
+        simulate();
 
       } else {
         let results = [];
@@ -808,7 +841,7 @@ let simulateGeneration = () => {
 
         results.sort((a, b) => (a.place > b.place) ? 1 : ((b.place > a.place) ? -1 : (a.fitness < b.fitness) ? 1 : ((b.fitness < a.fitness) ? -1 : 0)));
 
-        console.log("\n\Generation complete, saving results...");
+        console.log("\n\nGeneration complete, saving results ...\n");
 
         let fieldsGeneral = ['selector', 'uuid', 'places', 'place', 'fitness', 'vsBuyHold', 'wlRatio', 'frequency', 'strategy', 'order_type', 'endBalance', 'buyHold', 'fees', 'wins', 'losses', 'period_length', 'days', 'params'];
         let fieldNamesGeneral = ['Selector', 'UUID', 'Places', 'Place', 'Fitness', 'VS Buy Hold (%)', 'Win/Loss Ratio', '# Trades/Day', 'Strategy', 'Order Type', 'Ending Balance ($)', 'Buy Hold ($)', 'Fees ($)', '# Wins', '# Losses', 'Period', '# Days', 'Full Parameters'];
@@ -855,7 +888,7 @@ let simulateGeneration = () => {
 
   };
 
-  simulateDays();
+  simulate();
 
 };
 
