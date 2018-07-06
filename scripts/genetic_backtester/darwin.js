@@ -760,7 +760,8 @@ let simulateGeneration = () => {
     } else {
       end = tb('1d').toMilliseconds();
     }
-    while (start < end) {
+    let limit = end - (30 * 24 * 60 * 60 * 1000);
+    while (start < limit) {
       startList.push(moment(start).format("YYYY-MM-DD"));
       start += (30 * 24 * 60 * 60 * 1000);
     }
