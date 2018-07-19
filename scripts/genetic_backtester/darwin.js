@@ -765,6 +765,7 @@ let simulateGeneration = () => {
       startList.push(moment(start).format("YYYY-MM-DD"));
       start += (30 * 24 * 60 * 60 * 1000);
     }
+    startList.push(moment(argv.start).format("YYYY-MM-DD"));
   }
 
   let simulate = () => {
@@ -774,7 +775,7 @@ let simulateGeneration = () => {
       console.log("\n\nStart simulation for " + simArgs.days + " days ...\n" );
     } else if (simulationType === 'shifting') {
       simArgs.start = startList.shift();
-      if (startList.length > 0) {
+      if (startList.length > 1) {
         simArgs.days = 60;
       } else {
         delete(simArgs.days);
