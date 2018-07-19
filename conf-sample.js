@@ -19,11 +19,13 @@ c.strategy = 'trend_ema'
 
 // to enable GDAX trading, enter your API credentials:
 c.gdax = {}
+c.gdax.apiURI = 'https://api.pro.coinbase.com'
 c.gdax.key = 'YOUR-API-KEY'
 c.gdax.b64secret = 'YOUR-BASE64-SECRET'
 c.gdax.passphrase = 'YOUR-PASSPHRASE'
 c.gdax.websocket = {}
 c.gdax.websocket.enabled = true
+c.gdax.websocket.feed = 'wss://ws-feed.pro.coinbase.com'
 c.gdax.websocket.trade_history = 1000
 c.gdax.balance = {}
 c.gdax.balance.split = false
