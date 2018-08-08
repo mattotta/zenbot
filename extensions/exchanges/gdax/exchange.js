@@ -312,7 +312,7 @@ module.exports = function container (get, set, clear) {
         opts.post_only = true
       }
       if (opts.order_type === 'taker') {
-        opts.funds = n(opts.total).add(n(opts.total).multiply(this.takerFee).divide(100)).format('0.00000000')
+        opts.funds = n(opts.total).add(n(opts.total).multiply(this.takerFee).divide(100)).format(opts.increment, Math.floor)
         delete opts.price
         delete opts.size
         delete opts.post_only
@@ -332,6 +332,7 @@ module.exports = function container (get, set, clear) {
       delete opts.orig_size
       delete opts.remaining_size
       delete opts.orig_price
+      delete opts.increment
       client.buy(opts, function (err, resp, body) {
         if (!resp && err && err.response) resp = err.response
         if (!body && err && err.data) body = err.data
