@@ -16,6 +16,8 @@ request('https://api.gdax.com/products', {headers: {'User-Agent': 'zenbot/4'}}, 
       currency: product.quote_currency,
       min_size: product.base_min_size,
       max_size: product.base_max_size,
+      min_funds: product.min_market_funds,
+      max_funds: product.max_market_funds,
       increment: product.quote_increment,
       label: product.display_name
     })
