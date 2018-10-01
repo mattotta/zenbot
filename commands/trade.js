@@ -48,6 +48,7 @@ module.exports = function container (get, set, clear) {
       .option('--debug', 'output detailed debug info')
       .option('--markdown_bid_pct <pct>', '% to mark down bid price for simulated quote', Number, c.markdown_bid_pct)
       .option('--markup_ask_pct <pct>', ' % to mark up ask price for simulated quote', Number, c.markup_ask_pct)
+      .option('--no_db_save', 'do not save anything to database at all', Boolean, false)
       .action(function (selector, cmd) {
         var raw_opts = minimist(process.argv)
         var s = {options: JSON.parse(JSON.stringify(raw_opts))}
@@ -230,7 +231,7 @@ module.exports = function container (get, set, clear) {
                 //ymd
                 var today = dt.slice(2, 4) + dt.slice(5, 7) + dt.slice(8, 10);
                 out_target = so.filename || 'simulations/trade_result_' + so.selector.normalized +'_' + today + '_UTC.html'
-              fs.writeFileSync(out_target, out)
+                fs.writeFileSync(out_target, out)
               }else
                 out_target = so.filename || 'simulations/trade_result_' + so.selector.normalized +'_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/-/g, '').replace(/:/g, '').replace(/20/, '') + '_UTC.html'
               
@@ -346,14 +347,14 @@ module.exports = function container (get, set, clear) {
         }
 
         var db_cursor, trade_cursor
-        var query_start = tb().resize(so.period_length).subtract(so.min_periods * 2).toMilliseconds()
+        var query_start = tb().resize(so.period_length).subtract(so.min_periods * 10).toMilliseconds()
         var days = Math.ceil((new Date().getTime() - query_start) / 86400000)
         var session = null
-        var sessions = get('db.sessions')
-        var balances = get('db.balances')
-        var trades = get('db.trades')
+        var db_sessions = get('db.sessions')
+        var db_balances = get('db.balances')
+        var db_trades = get('db.trades')
         get('db.mongo').collection('trades').ensureIndex({selector: 1, time: 1, trade_id: 1})
-        var resume_markers = get('db.resume_markers')
+        var db_resume_markers = get('db.resume_markers')
         get('db.mongo').collection('resume_markers').ensureIndex({selector: 1, to: -1})
         var marker = {
           id: crypto.randomBytes(4).toString('hex'),
@@ -364,8 +365,8 @@ module.exports = function container (get, set, clear) {
         }
         var lookback_size = 0
         var my_trades_size = 0
-        var my_trades = get('db.my_trades')
-        var periods = get('db.periods')
+        var db_my_trades = get('db.my_trades')
+        var db_periods = get('db.periods')
 
         console.log('fetching pre-roll data:')
         var zenbot_cmd = process.platform === 'win32' ? 'zenbot.bat' : 'zenbot.sh'; // Use 'win32' for 64 bit windows too
@@ -416,7 +417,7 @@ module.exports = function container (get, set, clear) {
                     mode: so.mode,
                     options: so
                   }
-                  sessions.select({query: {selector: so.selector.normalized}, limit: 1, sort: {started: -1}}, function (err, prev_sessions) {
+                  db_sessions.select({query: {selector: so.selector.normalized}, limit: 1, sort: {started: -1}}, function (err, prev_sessions) {
                     if (err) throw err
                     var prev_session = prev_sessions[0]
                     if (prev_session && !cmd.reset_profit) {
@@ -549,8 +550,8 @@ module.exports = function container (get, set, clear) {
                 b.buy_hold = s.period.close * (session.orig_capital / session.orig_price)
                 b.buy_hold_profit = (b.buy_hold - session.orig_capital) / session.orig_capital
                 b.vs_buy_hold = (b.consolidated - b.buy_hold) / b.buy_hold
-                if (so.mode === 'live') {
-                  balances.save(b, function (err) {
+                if (so.mode === 'live' && !so.no_db_save) {
+                  db_balances.save(b, function (err) {
                     if (err) {
                       console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving balance')
                       console.error(err)
@@ -565,11 +566,7 @@ module.exports = function container (get, set, clear) {
                   asset: s.balance.asset
                 }
               }
-              sessions.save(session, function (err) {
-                if (err) {
-                  console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving session')
-                  console.error(err)
-                }
+              if (so.no_db_save) {
                 if (s.period) {
                   engine.writeReport(true)
                 } else {
@@ -577,7 +574,21 @@ module.exports = function container (get, set, clear) {
                   readline.cursorTo(process.stdout, 0)
                   process.stdout.write('Waiting on first live trade to display reports, could be a few minutes ...')
                 }
-              })
+              } else {
+                db_sessions.save(session, function (err) {
+                  if (err) {
+                    console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving session')
+                    console.error(err)
+                  }
+                  if (s.period) {
+                    engine.writeReport(true)
+                  } else {
+                    readline.clearLine(process.stdout)
+                    readline.cursorTo(process.stdout, 0)
+                    process.stdout.write('Waiting on first live trade to display reports, could be a few minutes ...')
+                  }
+                })
+              }
             })
           }
           var opts = {product_id: so.selector.product_id, from: trade_cursor}
@@ -621,34 +632,39 @@ module.exports = function container (get, set, clear) {
                   console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving session')
                   console.error(err)
                 }
-                resume_markers.save(marker, function (err) {
-                  if (err) {
-                    console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving marker')
-                    console.error(err)
-                  }
-                })
-                if (s.my_trades.length > my_trades_size) {
-                  s.my_trades.slice(my_trades_size).forEach(function (my_trade) {
-                    my_trade.id = crypto.randomBytes(4).toString('hex')
-                    my_trade.selector = so.selector.normalized
-                    my_trade.session_id = session.id
-                    my_trade.mode = so.mode
-                    my_trades.save(my_trade, function (err) {
-                      if (err) {
-                        console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving my_trade')
-                        console.error(err)
-                      }
-                    })
+                if (!so.no_db_save) {
+                  db_resume_markers.save(marker, function (err) {
+                    if (err) {
+                      console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving marker')
+                      console.error(err)
+                    }
                   })
-                  my_trades_size = s.my_trades.length
+                  if (s.my_trades.length > my_trades_size) {
+                    s.my_trades.slice(my_trades_size).forEach(function (my_trade) {
+                      my_trade.id = crypto.randomBytes(4).toString('hex')
+                      my_trade.selector = so.selector.normalized
+                      my_trade.session_id = session.id
+                      my_trade.mode = so.mode
+                      db_my_trades.save(my_trade, function (err) {
+                        if (err) {
+                          console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving my_trade')
+                          console.error(err)
+                        }
+                      })
+                    })
+                    my_trades_size = s.my_trades.length
+                  }
                 }
                 function savePeriod (period) {
+                  if (so.no_db_save) {
+                    return
+                  }
                   if (!period.id) {
                     period.id = crypto.randomBytes(4).toString('hex')
                     period.selector = so.selector.normalized
                     period.session_id = session.id
                   }
-                  periods.save(period, function (err) {
+                  db_periods.save(period, function (err) {
                     if (err) {
                       console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving my_trade')
                       console.error(err)
@@ -673,6 +689,9 @@ module.exports = function container (get, set, clear) {
             }
           })
           function saveTrade (trade) {
+            if (so.no_db_save) {
+              return
+            }
             trade.id = so.selector.normalized + '-' + String(trade.trade_id)
             trade.selector = so.selector.normalized
             if (!marker.from) {
@@ -682,7 +701,7 @@ module.exports = function container (get, set, clear) {
             }
             marker.to = marker.to ? Math.max(marker.to, trade_cursor) : trade_cursor
             marker.newest_time = Math.max(marker.newest_time, trade.time)
-            trades.save(trade, function (err) {
+            db_trades.save(trade, function (err) {
               // ignore duplicate key errors
               if (err && err.code !== 11000) {
                 console.error('\n' + moment().format('YYYY-MM-DD HH:mm:ss') + ' - error saving trade')
